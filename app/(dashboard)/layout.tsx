@@ -1,12 +1,9 @@
-// Dashboard layout placeholder
-export default function DashboardLayout({
+import { DashboardLayout } from '@/components/layout/app-layout';
+
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="dashboard-layout">
-      {children}
-    </div>
-  );
+  return <DashboardLayout>{children}</DashboardLayout>;
 }

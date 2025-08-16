@@ -1,12 +1,9 @@
-// Auth layout placeholder
-export default function AuthLayout({
+import { AuthLayout } from '@/components/layout/app-layout';
+
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="auth-layout">
-      {children}
-    </div>
-  );
+  return <AuthLayout>{children}</AuthLayout>;
 }

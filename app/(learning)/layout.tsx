@@ -1,12 +1,9 @@
-// Learning layout placeholder
-export default function LearningLayout({
+import { LearningLayout } from '@/components/layout/app-layout';
+
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="learning-layout">
-      {children}
-    </div>
-  );
+  return <LearningLayout>{children}</LearningLayout>;
 }
