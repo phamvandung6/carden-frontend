@@ -1,3 +1,5 @@
+'use client';
+
 // Authentication Hooks
 import { useEffect } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';

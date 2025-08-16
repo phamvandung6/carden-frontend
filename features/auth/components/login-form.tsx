@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useForm, useFormSubmission } from '@/lib/hooks/use-form';
+import { useForm } from '@/lib/hooks/use-form';
 import { loginSchema, type LoginFormData } from '@/lib/validations/auth';
 import { useAuth } from '@/features/auth';
 
@@ -27,16 +27,17 @@ export function LoginForm() {
     },
   });
 
-  const { handleSubmit } = useFormSubmission<LoginFormData>({
-    onSubmit: async (data) => {
-      return await login({
+  const handleSubmit = async (data: LoginFormData) => {
+    try {
+      await login({
         usernameOrEmail: data.usernameOrEmail,
         password: data.password,
       });
-    },
-    successMessage: 'Successfully logged in!',
-    loadingMessage: 'Signing in...',
-  });
+    } catch (error) {
+      // Error đã được handle bởi useAuth mutation
+      console.error('Login error:', error);
+    }
+  };
 
   return (
     <Form {...form}>

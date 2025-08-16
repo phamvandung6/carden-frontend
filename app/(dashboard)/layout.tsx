@@ -1,9 +1,14 @@
 import { DashboardLayout } from '@/components/layout/app-layout';
+import { AuthGuard } from '@/features/auth';
 
 export default function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return <DashboardLayout>{children}</DashboardLayout>;
+  return (
+    <AuthGuard>
+      <DashboardLayout>{children}</DashboardLayout>
+    </AuthGuard>
+  );
 }

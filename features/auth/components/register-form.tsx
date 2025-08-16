@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useForm, useFormSubmission } from '@/lib/hooks/use-form';
+import { useForm } from '@/lib/hooks/use-form';
 import { registerSchema, type RegisterFormData } from '@/lib/validations/auth';
 import { useAuth } from '@/features/auth';
 
@@ -30,18 +30,19 @@ export function RegisterForm() {
     },
   });
 
-  const { handleSubmit } = useFormSubmission<RegisterFormData>({
-    onSubmit: async (data) => {
-      return await register({
+  const handleSubmit = async (data: RegisterFormData) => {
+    try {
+      await register({
         username: data.username,
         email: data.email,
         password: data.password,
         fullName: data.fullName,
       });
-    },
-    successMessage: 'Account created successfully!',
-    loadingMessage: 'Creating account...',
-  });
+    } catch (error) {
+      // Error đã được handle bởi useAuth mutation
+      console.error('Register error:', error);
+    }
+  };
 
   return (
     <Form {...form}>
