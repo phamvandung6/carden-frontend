@@ -52,7 +52,7 @@ export function DeckForm({ deck, onSubmit, onCancel, loading = false, error }: D
     } else {
       form.reset(getDefaultDeckFormData());
     }
-  }, [deck, form, setValue]);
+  }, [deck, setValue, form.reset]);
 
   const handleFormSubmit = async (data: DeckFormInput) => {
     try {

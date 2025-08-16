@@ -1,5 +1,5 @@
 // Deck types based on API documentation
-export interface DeckCard {
+export interface DeckCardData {
   cardId: number;
   frontText: string;
   frontImageUrl: string;
@@ -77,7 +77,7 @@ export interface DeckSearchParams {
   sort?: string;
 }
 
-// Pagination response from API
+// Pagination response from API  
 export interface PageableResponse<T> {
   totalElements: number;
   totalPages: number;

@@ -35,7 +35,7 @@ export function usePublicDecks(params: DeckSearchParams = {}) {
         if (response.success && response.data) {
           const { content, totalElements, totalPages, number } = response.data;
           
-          // Transform DeckCard[] to Deck[] (extract deck info)
+          // Transform DeckCardData[] to Deck[] (extract deck info)
           const decks: Deck[] = content.map(card => ({
             id: card.deckId,
             title: card.deckTitle,
@@ -81,6 +81,21 @@ export function usePublicDecks(params: DeckSearchParams = {}) {
   });
 }
 
+// Hook for getting a single deck by ID
+export function useDeckById(deckId: number) {
+  return useQuery({
+    queryKey: DECK_QUERY_KEYS.detail(deckId),
+    queryFn: async () => {
+      const response = await DecksApi.getDeckById(deckId);
+      if (response.success && response.data) {
+        return response.data;
+      }
+      throw new Error(response.message || 'Failed to fetch deck');
+    },
+    enabled: !!deckId && deckId > 0,
+  });
+}
+
 // Hook for searching user's decks
 export function useMyDecks(params: DeckSearchParams = {}) {
   const { setDecks, setLoading, setError, setPagination } = useDecksStore();
@@ -97,7 +112,7 @@ export function useMyDecks(params: DeckSearchParams = {}) {
         if (response.success && response.data) {
           const { content, totalElements, totalPages, number } = response.data;
           
-          // Transform DeckCard[] to Deck[] (extract deck info)
+          // Transform DeckCardData[] to Deck[] (extract deck info)
           const decks: Deck[] = content.map(card => ({
             id: card.deckId,
             title: card.deckTitle,

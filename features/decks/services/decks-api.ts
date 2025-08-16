@@ -2,7 +2,7 @@ import { apiClient } from '@/lib/api/client';
 import type { ApiResponse } from '@/types/api';
 import type {
   Deck,
-  DeckCard,
+  DeckCardData,
   CreateDeckRequest,
   UpdateDeckRequest,
   DeckSearchParams,
@@ -15,7 +15,7 @@ export class DecksApi {
    * Search public decks (no authentication required)
    * GET /v1/decks
    */
-  static async searchPublicDecks(params: DeckSearchParams = {}): Promise<ApiResponse<PageableResponse<DeckCard>>> {
+  static async searchPublicDecks(params: DeckSearchParams = {}): Promise<ApiResponse<PageableResponse<DeckCardData>>> {
     const searchParams = new URLSearchParams();
     
     if (params.q) searchParams.append('q', params.q);
@@ -33,7 +33,7 @@ export class DecksApi {
    * Search user's own decks (authentication required)
    * GET /v1/decks/me
    */
-  static async searchMyDecks(params: DeckSearchParams = {}): Promise<ApiResponse<PageableResponse<DeckCard>>> {
+  static async searchMyDecks(params: DeckSearchParams = {}): Promise<ApiResponse<PageableResponse<DeckCardData>>> {
     const searchParams = new URLSearchParams();
     
     if (params.q) searchParams.append('q', params.q);
