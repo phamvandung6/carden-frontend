@@ -43,11 +43,11 @@ export default function DeckDetailPage() {
   const { deleteDeck } = useDeckOperations();
 
   const handleBack = () => {
-    router.push('/dashboard/decks');
+    router.push('/decks');
   };
 
   const handleEdit = () => {
-    router.push(`/dashboard/decks/${deckId}/edit`);
+    router.push(`/decks/${deckId}/edit`);
   };
 
   const handleStudy = () => {
@@ -83,7 +83,7 @@ export default function DeckDetailPage() {
     try {
       await deleteDeck.mutateAsync(deckId);
       toast.success('Deck deleted successfully');
-      router.push('/dashboard/decks');
+      router.push('/decks');
     } catch (error) {
       console.error('Failed to delete deck:', error);
       toast.error('Failed to delete deck');

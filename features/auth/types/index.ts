@@ -6,12 +6,14 @@ import type { ApiResponse } from '@/types';
 export interface User {
   id: number;
   username: string;
-  email: string;
   displayName: string;
+  email: string;
   role: 'USER' | 'ADMIN';
   emailVerified: boolean;
-  uiLanguage: string;
+  uiLanguage: 'EN' | 'VI';
   timezone: string;
+  learningGoalCardsPerDay: number;
+  profileImageUrl: string | null;
 }
 
 export interface AuthResponse {

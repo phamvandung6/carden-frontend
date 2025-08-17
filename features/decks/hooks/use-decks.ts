@@ -108,6 +108,7 @@ export function useMyDecks(params: DeckSearchParams = {}) {
         setError(null);
         
         const response = await DecksApi.searchMyDecks(params);
+        console.log('🔍 useMyDecks response:', response);
         
         if (response.success && response.data) {
           const { content, totalElements, totalPages, number } = response.data;

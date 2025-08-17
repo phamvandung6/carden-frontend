@@ -16,7 +16,7 @@ interface DeckFormPageProps {
   backUrl?: string;
 }
 
-export function DeckFormPage({ deck, onSuccess, backUrl = '/dashboard/decks' }: DeckFormPageProps) {
+export function DeckFormPage({ deck, onSuccess, backUrl = '/decks' }: DeckFormPageProps) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const isEditing = !!deck;
@@ -52,7 +52,7 @@ export function DeckFormPage({ deck, onSuccess, backUrl = '/dashboard/decks' }: 
           if (onSuccess) {
             onSuccess(response.data);
           } else {
-            router.push(`/dashboard/decks/${response.data.id}`);
+            router.push(`/decks/${response.data.id}`);
           }
         }
       }

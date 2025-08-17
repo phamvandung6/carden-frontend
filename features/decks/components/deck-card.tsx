@@ -78,7 +78,7 @@ export function DeckCard({
   
   const isOwner = isDeckEditable(deck, currentUserId);
   const canDelete = isDeckDeletable(deck, currentUserId);
-  const cardHref = href || `/dashboard/decks/${deck.id}`;
+  const cardHref = href || `/decks/${deck.id}`;
 
   const getVisibilityIcon = (visibility: Deck['visibility']) => {
     switch (visibility) {

@@ -10,6 +10,16 @@ export const queryKeys = {
   },
 
   // User queries
+  user: {
+    all: ['user'] as const,
+    profile: () => [...queryKeys.user.all, 'profile'] as const,
+    ttsSettings: () => [...queryKeys.user.all, 'tts-settings'] as const,
+    stats: () => [...queryKeys.user.all, 'stats'] as const,
+    achievements: () => [...queryKeys.user.all, 'achievements'] as const,
+    preferences: () => [...queryKeys.user.all, 'preferences'] as const,
+  },
+  
+  // Users queries (for admin/management)
   users: {
     all: ['users'] as const,
     lists: () => [...queryKeys.users.all, 'list'] as const,

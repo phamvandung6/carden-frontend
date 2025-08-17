@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useAuthStore, authSelectors } from '../stores/auth-store';
 import { authApi } from '../services/auth-api';
+import { userApi } from '../../user/services/user-api';
 import { queryKeys } from '@/lib/utils/query-keys';
 import { handleMutationError, handleMutationSuccess } from '@/lib/utils/query-error-handler';
 import type { LoginRequest, RegisterRequest } from '../types';
@@ -98,7 +99,7 @@ export function useAuth() {
   // Profile query (only if authenticated)
   const profileQuery = useQuery({
     queryKey: queryKeys.auth.profile(),
-    queryFn: authApi.getProfile,
+    queryFn: userApi.getProfile,
     enabled: isLoggedIn,
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error: any) => {

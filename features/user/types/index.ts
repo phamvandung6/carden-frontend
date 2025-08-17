@@ -1,146 +1,167 @@
-// User Feature Types
+// User Types & Interfaces
+// Based on API documentation: /v1/users/*
+
+// Base User interface (matching backend response)
 export interface User {
-  id: string;
+  id: number;
+  username: string;
+  displayName: string;
   email: string;
-  displayName: string;
-  avatar?: string;
+  role: 'USER' | 'ADMIN';
   emailVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface UserProfile {
-  id: string;
-  displayName: string;
-  avatar?: string;
-  bio?: string;
-  location?: string;
-  website?: string;
-  socialLinks?: {
-    twitter?: string;
-    linkedin?: string;
-    github?: string;
-  };
-  preferences: UserPreferences;
-  ttsSettings: TTSSettings;
-}
-
-export interface UserPreferences {
-  language: string;
+  uiLanguage: 'EN' | 'VI';
   timezone: string;
-  theme: 'light' | 'dark' | 'system';
+  learningGoalCardsPerDay: number;
+  profileImageUrl: string | null;
+}
+
+// User Profile (extends User for profile management)
+export interface UserProfile extends User {
+  // Additional profile-specific fields can be added here
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+// Update Profile Request (all fields optional)
+export interface UpdateUserProfileRequest {
+  displayName?: string;
+  email?: string;
+  uiLanguage?: 'EN' | 'VI';
+  timezone?: string;
+  learningGoalCardsPerDay?: number;
+  profileImageUrl?: string;
+}
+
+// TTS Settings
+export interface TTSSettings {
+  preferredVoice: string | null;
+  speechRate: number; // 0.5 - 2.0
+  speechPitch: number; // 0.5 - 2.0
+  speechVolume: number; // 0.0 - 1.0
+  ttsEnabled: boolean;
+}
+
+// Update TTS Settings Request (all fields optional)
+export interface UpdateTTSSettingsRequest {
+  preferredVoice?: string;
+  speechRate?: number;
+  speechPitch?: number;
+  speechVolume?: number;
+  ttsEnabled?: boolean;
+}
+
+// Avatar Upload Types
+export interface PresignedUrlResponse {
+  uploadUrl: string;
+  key: string;
+  publicUrl: string;
+  expiresAt: string;
+}
+
+export interface AvatarConfirmResponse {
+  message: string;
+  data: string; // The confirmed avatar URL
+}
+
+// User Preferences (for UI settings)
+export interface UserPreferences {
+  theme?: 'light' | 'dark' | 'system';
+  language: 'EN' | 'VI';
+  timezone: string;
+  learningGoal: number;
   emailNotifications: boolean;
   pushNotifications: boolean;
-  studyReminders: boolean;
-  dailyGoal: number; // cards per day
-  weeklyGoal: number; // cards per week
-  autoPlayAudio: boolean;
-  showProgressInTitle: boolean;
 }
 
-export interface TTSSettings {
-  enabled: boolean;
-  voice: string; // voice ID from Web Speech API
-  rate: number; // 0.1 to 10
-  pitch: number; // 0 to 2
-  volume: number; // 0 to 1
-  autoPlay: boolean;
-  language: string; // language code
-}
-
+// User Statistics (for dashboard/profile display)
 export interface UserStats {
   totalDecks: number;
   totalCards: number;
-  totalStudyTime: number; // in minutes
-  currentStreak: number; // days
-  longestStreak: number; // days
+  studyStreak: number;
   cardsStudiedToday: number;
-  cardsStudiedThisWeek: number;
-  cardsStudiedThisMonth: number;
-  averageAccuracy: number; // percentage
+  averageAccuracy: number;
+  totalStudyTime: number; // in minutes
   level: number;
-  xp: number;
+  experiencePoints: number;
   nextLevelXP: number;
 }
 
-export interface UserAchievement {
-  id: string;
+// Achievement System
+export interface Achievement {
+  id: number;
   name: string;
   description: string;
-  icon: string;
+  iconUrl: string;
   unlockedAt?: string;
-  progress?: {
-    current: number;
-    total: number;
-  };
+  progress?: number;
+  maxProgress?: number;
+  category: 'study' | 'social' | 'streak' | 'mastery' | 'collection';
 }
 
-// API Request/Response types
-export interface UpdateProfileRequest {
-  displayName?: string;
-  bio?: string;
-  location?: string;
-  website?: string;
-  socialLinks?: UserProfile['socialLinks'];
-}
-
-export interface UpdatePreferencesRequest {
-  preferences: Partial<UserPreferences>;
-}
-
-export interface UpdateTTSSettingsRequest {
-  ttsSettings: Partial<TTSSettings>;
-}
-
-export interface UploadAvatarRequest {
-  file: File;
-}
-
-export interface UploadAvatarResponse {
-  avatarUrl: string;
-}
-
-// State types
+// User Store State
 export interface UserState {
+  // User data
+  user: User | null;
   profile: UserProfile | null;
+  ttsSettings: TTSSettings | null;
+  preferences: UserPreferences | null;
   stats: UserStats | null;
-  achievements: UserAchievement[];
+  achievements: Achievement[];
+  
+  // Loading states
   isLoading: boolean;
+  isProfileLoading: boolean;
+  isTTSLoading: boolean;
+  isStatsLoading: boolean;
+  isAchievementsLoading: boolean;
+  
+  // Error states
   error: string | null;
+  profileError: string | null;
+  ttsError: string | null;
 }
 
-// Form types
+// Form Types
 export interface ProfileFormData {
   displayName: string;
-  bio: string;
-  location: string;
-  website: string;
-  socialLinks: {
-    twitter: string;
-    linkedin: string;
-    github: string;
-  };
-}
-
-export interface PreferencesFormData {
-  language: string;
+  email: string;
+  uiLanguage: 'EN' | 'VI';
   timezone: string;
-  theme: 'light' | 'dark' | 'system';
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  studyReminders: boolean;
-  dailyGoal: number;
-  weeklyGoal: number;
-  autoPlayAudio: boolean;
-  showProgressInTitle: boolean;
+  learningGoalCardsPerDay: number;
 }
 
 export interface TTSFormData {
-  enabled: boolean;
-  voice: string;
-  rate: number;
-  pitch: number;
-  volume: number;
-  autoPlay: boolean;
-  language: string;
+  preferredVoice: string;
+  speechRate: number;
+  speechPitch: number;
+  speechVolume: number;
+  ttsEnabled: boolean;
 }
+
+export interface PreferencesFormData {
+  theme: 'light' | 'dark' | 'system';
+  language: 'EN' | 'VI';
+  timezone: string;
+  learningGoal: number;
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+}
+
+// Avatar Upload Types
+export interface AvatarUploadState {
+  isUploading: boolean;
+  uploadProgress: number;
+  previewUrl: string | null;
+  error: string | null;
+}
+
+// Export all types
+export type {
+  User as UserType,
+  UserProfile as UserProfileType,
+  UserStats as UserStatsType,
+  Achievement as AchievementType,
+  TTSSettings as TTSSettingsType,
+  UserPreferences as UserPreferencesType,
+  UserState as UserStateType,
+};

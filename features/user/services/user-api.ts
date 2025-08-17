@@ -1,101 +1,66 @@
 // User API Service
+// Based on backend API documentation: /v1/users/*
+
 import { apiClient } from '@/lib/api/client';
 import type { ApiResponse } from '@/types';
 import type {
+  User,
   UserProfile,
-  UserStats,
-  UserAchievement,
-  UpdateProfileRequest,
-  UpdatePreferencesRequest,
+  UpdateUserProfileRequest,
+  TTSSettings,
   UpdateTTSSettingsRequest,
-  UploadAvatarResponse
+  PresignedUrlResponse,
+  AvatarConfirmResponse
 } from '../types';
 
 export const userApi = {
-  // Profile management
-  async getProfile(userId?: string): Promise<ApiResponse<UserProfile>> {
-    const endpoint = userId ? `/users/${userId}/profile` : '/users/profile';
-    return apiClient.get(endpoint);
+  /**
+   * Get current user profile
+   * GET /v1/users/me
+   */
+  async getProfile(): Promise<ApiResponse<User>> {
+    return apiClient.get('/v1/users/me');
   },
 
-  async updateProfile(data: UpdateProfileRequest): Promise<ApiResponse<UserProfile>> {
-    return apiClient.patch('/users/profile', data);
+  /**
+   * Update user profile
+   * PATCH /v1/users/me
+   */
+  async updateProfile(data: UpdateUserProfileRequest): Promise<ApiResponse<User>> {
+    return apiClient.patch('/v1/users/me', data);
   },
 
-  async uploadAvatar(file: File): Promise<ApiResponse<UploadAvatarResponse>> {
-    const formData = new FormData();
-    formData.append('avatar', file);
-    
-    return apiClient.post('/users/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+  /**
+   * Get TTS settings
+   * GET /v1/users/me/tts-settings
+   */
+  async getTTSSettings(): Promise<ApiResponse<TTSSettings>> {
+    return apiClient.get('/v1/users/me/tts-settings');
   },
 
-  async deleteAvatar(): Promise<ApiResponse<{ message: string }>> {
-    return apiClient.delete('/users/avatar');
+  /**
+   * Update TTS settings
+   * PATCH /v1/users/me/tts-settings
+   */
+  async updateTTSSettings(data: UpdateTTSSettingsRequest): Promise<ApiResponse<TTSSettings>> {
+    return apiClient.patch('/v1/users/me/tts-settings', data);
   },
 
-  // User preferences
-  async updatePreferences(data: UpdatePreferencesRequest): Promise<ApiResponse<UserProfile>> {
-    return apiClient.patch('/users/preferences', data);
+  /**
+   * Get presigned URL for avatar upload
+   * POST /v1/users/me/avatar/presign?contentType={content_type}
+   */
+  async getAvatarPresignedUrl(contentType: string): Promise<ApiResponse<PresignedUrlResponse>> {
+    return apiClient.post(`/v1/users/me/avatar/presign?contentType=${encodeURIComponent(contentType)}`);
   },
 
-  // TTS settings
-  async updateTTSSettings(data: UpdateTTSSettingsRequest): Promise<ApiResponse<UserProfile>> {
-    return apiClient.patch('/users/tts-settings', data);
+  /**
+   * Confirm avatar upload
+   * POST /v1/users/me/avatar/confirm?publicUrl={public_url}
+   */
+  async confirmAvatarUpload(publicUrl: string): Promise<ApiResponse<AvatarConfirmResponse>> {
+    return apiClient.post(`/v1/users/me/avatar/confirm?publicUrl=${encodeURIComponent(publicUrl)}`);
   },
-
-  // User statistics
-  async getStats(userId?: string): Promise<ApiResponse<UserStats>> {
-    const endpoint = userId ? `/users/${userId}/stats` : '/users/stats';
-    return apiClient.get(endpoint);
-  },
-
-  // User achievements
-  async getAchievements(userId?: string): Promise<ApiResponse<UserAchievement[]>> {
-    const endpoint = userId ? `/users/${userId}/achievements` : '/users/achievements';
-    return apiClient.get(endpoint);
-  },
-
-  // Account management
-  async deleteAccount(): Promise<ApiResponse<{ message: string }>> {
-    return apiClient.delete('/users/account');
-  },
-
-  async exportData(): Promise<ApiResponse<{ downloadUrl: string }>> {
-    return apiClient.post('/users/export');
-  },
-
-  // User search (for mentions, sharing, etc.)
-  async searchUsers(query: string, limit = 10): Promise<ApiResponse<UserProfile[]>> {
-    return apiClient.get('/users/search', {
-      params: { q: query, limit }
-    });
-  },
-
-  // Public profile (for viewing other users)
-  async getPublicProfile(userId: string): Promise<ApiResponse<Omit<UserProfile, 'preferences' | 'ttsSettings'>>> {
-    return apiClient.get(`/users/${userId}/public`);
-  },
-
-  // Follow system (if implemented)
-  async followUser(userId: string): Promise<ApiResponse<{ message: string }>> {
-    return apiClient.post(`/users/${userId}/follow`);
-  },
-
-  async unfollowUser(userId: string): Promise<ApiResponse<{ message: string }>> {
-    return apiClient.delete(`/users/${userId}/follow`);
-  },
-
-  async getFollowers(userId?: string): Promise<ApiResponse<UserProfile[]>> {
-    const endpoint = userId ? `/users/${userId}/followers` : '/users/followers';
-    return apiClient.get(endpoint);
-  },
-
-  async getFollowing(userId?: string): Promise<ApiResponse<UserProfile[]>> {
-    const endpoint = userId ? `/users/${userId}/following` : '/users/following';
-    return apiClient.get(endpoint);
-  }
 };
+
+export default userApi;

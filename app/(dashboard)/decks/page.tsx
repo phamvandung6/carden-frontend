@@ -18,11 +18,11 @@ export default function DecksPage() {
   const currentUserId = 1;
 
   const handleCreateDeck = () => {
-    router.push('/dashboard/decks/create');
+    router.push('/decks/create');
   };
 
   const handleEditDeck = (deck: { id: number }) => {
-    router.push(`/dashboard/decks/${deck.id}/edit`);
+    router.push(`/decks/${deck.id}/edit`);
   };
 
   return (

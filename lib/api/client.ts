@@ -3,7 +3,7 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import type { ApiResponse, ApiError } from '@/types';
 
 export const apiClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -40,8 +40,8 @@ apiClient.interceptors.response.use(
       console.log(`API Request: ${response.config.method?.toUpperCase()} ${response.config.url} - ${duration}ms`);
     }
     
-    // Return the response data directly (assumes API returns ApiResponse format)
-    return response.data;
+    // Return the response itself (don't unwrap response.data automatically)
+    return response;
   },
   (error: AxiosError) => {
     // Transform axios error to our ApiError format

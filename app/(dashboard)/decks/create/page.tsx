@@ -16,7 +16,7 @@ export default function CreateDeckPage() {
 
   const handleSuccess = () => {
     toast.success('Deck created successfully!');
-    router.push('/dashboard/decks');
+    router.push('/decks');
   };
 
 
@@ -39,7 +39,7 @@ export default function CreateDeckPage() {
       <div className="max-w-2xl">
         <DeckFormPage
           onSuccess={handleSuccess}
-          backUrl="/dashboard/decks"
+          backUrl="/decks"
         />
       </div>
     </div>

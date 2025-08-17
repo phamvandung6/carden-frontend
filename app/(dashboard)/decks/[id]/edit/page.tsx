@@ -17,12 +17,12 @@ export default function EditDeckPage() {
   const { data: deck, isLoading, error } = useDeckById(deckId);
 
   const handleBack = () => {
-    router.push(`/dashboard/decks/${deckId}`);
+    router.push(`/decks/${deckId}`);
   };
 
   const handleSuccess = () => {
     toast.success('Deck updated successfully!');
-    router.push(`/dashboard/decks/${deckId}`);
+    router.push(`/decks/${deckId}`);
   };
 
 
@@ -43,7 +43,7 @@ export default function EditDeckPage() {
       <div className="container mx-auto py-6">
         <div className="text-center py-12">
           <p className="text-destructive mb-4">Failed to load deck</p>
-          <Button onClick={() => router.push('/dashboard/decks')} variant="outline">
+                      <Button onClick={() => router.push('/decks')} variant="outline">
             Back to Decks
           </Button>
         </div>
@@ -70,7 +70,7 @@ export default function EditDeckPage() {
         <DeckFormPage
           deck={deck}
           onSuccess={handleSuccess}
-          backUrl={`/dashboard/decks/${deckId}`}
+          backUrl={`/decks/${deckId}`}
         />
       </div>
     </div>

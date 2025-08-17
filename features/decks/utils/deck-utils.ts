@@ -181,13 +181,6 @@ export function generateDeckSlug(deck: Deck): string {
 }
 
 /**
- * Convert camelCase to snake_case for API parameters
- */
-function camelToSnakeCase(str: string): string {
-  return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
-}
-
-/**
  * Parse deck filters for API query
  */
 export function parseFiltersToApiParams(filters: DeckFilters): DeckSearchParams {
@@ -205,10 +198,9 @@ export function parseFiltersToApiParams(filters: DeckFilters): DeckSearchParams 
     params.cefr = filters.cefrLevel;
   }
 
-  // Sort parameter - convert to snake_case for API
+  // Sort parameter - use camelCase for API (backend expects camelCase)
   if (filters.sortBy && filters.sortOrder) {
-    const sortField = camelToSnakeCase(filters.sortBy);
-    params.sort = `${sortField},${filters.sortOrder}`;
+    params.sort = `${filters.sortBy},${filters.sortOrder}`;
   }
 
   return params;

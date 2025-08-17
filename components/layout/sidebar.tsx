@@ -48,14 +48,14 @@ export function Sidebar({ className }: SidebarProps) {
     },
     {
       title: 'My Decks',
-      href: '/dashboard/decks',
+      href: '/decks',
       icon: BookOpen,
       badge: '12', // This would come from actual data
       children: [
-        { title: 'All Decks', href: '/dashboard/decks', icon: BookOpen },
-        { title: 'Recent', href: '/dashboard/decks/recent', icon: Clock },
-        { title: 'Favorites', href: '/dashboard/decks/favorites', icon: Star },
-        { title: 'Create New', href: '/dashboard/decks/create', icon: Plus },
+        { title: 'All Decks', href: '/decks', icon: BookOpen },
+        { title: 'Recent', href: '/decks/recent', icon: Clock },
+        { title: 'Favorites', href: '/decks/favorites', icon: Star },
+        { title: 'Create New', href: '/decks/create', icon: Plus },
       ]
     },
     {
@@ -184,7 +184,7 @@ export function Sidebar({ className }: SidebarProps) {
       {/* Quick Actions (when expanded) */}
       {!isCollapsed && (
         <div className="p-3 border-t">
-          <Link href="/dashboard/decks/create">
+          <Link href="/decks/create">
             <Button className="w-full" size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Create Deck

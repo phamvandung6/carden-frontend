@@ -13,10 +13,10 @@ import type {
 export const authApi = {
   /**
    * Register new user account
-   * POST /api/v1/auth/register
+   * POST /v1/auth/register
    */
   async register(data: RegisterRequest): Promise<ApiResponse<AuthResponse>> {
-    return apiClient.post('/api/v1/auth/register', {
+    return apiClient.post('/v1/auth/register', {
       username: data.username,
       email: data.email,
       password: data.password,
@@ -26,10 +26,10 @@ export const authApi = {
 
   /**
    * Login to system
-   * POST /api/v1/auth/login
+   * POST /v1/auth/login
    */
   async login(data: LoginRequest): Promise<ApiResponse<AuthResponse>> {
-    return apiClient.post('/api/v1/auth/login', {
+    return apiClient.post('/v1/auth/login', {
       usernameOrEmail: data.usernameOrEmail,
       password: data.password
     });
@@ -37,37 +37,37 @@ export const authApi = {
 
   /**
    * Logout from system
-   * POST /api/v1/auth/logout
+   * POST /v1/auth/logout
    * Requires Authorization header with Bearer token
    */
   async logout(): Promise<ApiResponse<{ message: string }>> {
-    return apiClient.post('/api/v1/auth/logout');
+    return apiClient.post('/v1/auth/logout');
   },
 
   /**
-   * Get current user profile (if endpoint exists)
-   * This might be available as GET /api/v1/auth/profile or similar
+   * Get current user profile
+   * GET /v1/users/me
    */
   async getProfile(): Promise<ApiResponse<User>> {
-    return apiClient.get('/api/v1/auth/profile');
+    return apiClient.get('/v1/users/me');
   },
 
   /**
    * Refresh token (if endpoint exists)
-   * This might be available as POST /api/v1/auth/refresh
+   * This might be available as POST /v1/auth/refresh
    */
   async refreshToken(refreshToken?: string): Promise<ApiResponse<AuthResponse>> {
-    return apiClient.post('/api/v1/auth/refresh', {
+    return apiClient.post('/v1/auth/refresh', {
       refreshToken
     });
   },
 
   /**
    * Verify email (if endpoint exists)
-   * This might be available as POST /api/v1/auth/verify-email
+   * This might be available as POST /v1/auth/verify-email
    */
   async verifyEmail(token: string): Promise<ApiResponse<{ message: string }>> {
-    return apiClient.post('/api/v1/auth/verify-email', {
+    return apiClient.post('/v1/auth/verify-email', {
       token
     });
   },
@@ -76,14 +76,14 @@ export const authApi = {
    * Send verification email (if endpoint exists)
    */
   async sendVerificationEmail(): Promise<ApiResponse<{ message: string }>> {
-    return apiClient.post('/api/v1/auth/send-verification');
+    return apiClient.post('/v1/auth/send-verification');
   },
 
   /**
    * Request password reset (if endpoint exists)
    */
   async forgotPassword(email: string): Promise<ApiResponse<{ message: string }>> {
-    return apiClient.post('/api/v1/auth/forgot-password', {
+    return apiClient.post('/v1/auth/forgot-password', {
       email
     });
   },
@@ -92,7 +92,7 @@ export const authApi = {
    * Reset password (if endpoint exists)
    */
   async resetPassword(token: string, newPassword: string): Promise<ApiResponse<{ message: string }>> {
-    return apiClient.post('/api/v1/auth/reset-password', {
+    return apiClient.post('/v1/auth/reset-password', {
       token,
       newPassword
     });
@@ -102,7 +102,7 @@ export const authApi = {
    * Change password (if endpoint exists)
    */
   async changePassword(currentPassword: string, newPassword: string): Promise<ApiResponse<{ message: string }>> {
-    return apiClient.post('/api/v1/auth/change-password', {
+    return apiClient.post('/v1/auth/change-password', {
       currentPassword,
       newPassword
     });
