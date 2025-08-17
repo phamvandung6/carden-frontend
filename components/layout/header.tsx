@@ -5,14 +5,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, BookOpen } from 'lucide-react';
+import { Menu, BookOpen, Clock } from 'lucide-react';
 import { UserMenu } from './user-menu';
 import { useAuth } from '@/features/auth';
+import { useDueCardsCount, NextReviewInfo } from '@/features/study';
 import { cn } from '@/lib/utils';
 
 export function Header() {
   const pathname = usePathname();
   const { isLoggedIn } = useAuth();
+  const { data: dueCount } = useDueCardsCount();
   
   const isAuthPage = pathname.startsWith('/login') || pathname.startsWith('/register');
   
@@ -114,7 +116,31 @@ export function Header() {
         {/* Right Side Actions */}
         <div className="flex items-center space-x-4">
           {isLoggedIn ? (
-            <UserMenu />
+            <>
+              {/* Next Review Info */}
+              {dueCount && dueCount.totalDue === 0 && (
+                <div className="hidden md:flex items-center gap-2 px-3 py-1 bg-muted rounded-full text-sm">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <NextReviewInfo 
+                    nextAvailableTime={dueCount.nextCardAvailableAt}
+                    minutesUntil={dueCount.minutesUntilNext}
+                    variant="compact"
+                    showIcon={false}
+                  />
+                </div>
+              )}
+              
+              {/* Study Now Button */}
+              {dueCount && dueCount.totalDue > 0 && (
+                <Button size="sm" asChild className="hidden md:flex">
+                  <Link href="/practice">
+                    Study ({dueCount.totalDue})
+                  </Link>
+                </Button>
+              )}
+              
+              <UserMenu />
+            </>
           ) : (
             <div className="flex items-center space-x-2">
               <Button variant="ghost" asChild>

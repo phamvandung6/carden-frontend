@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   ArrowLeft, 
   Edit3, 
-  Play, 
   Share2, 
   Download, 
   Copy, 
@@ -34,6 +33,7 @@ import { toast } from 'sonner';
 import { PageHeader } from '@/components/ui/page-header';
 import { useDeckById, useDeckOperations } from '@/features/decks';
 import { CardList } from '@/features/flashcards';
+import { useDueCardsCount, StudyButton, StudyStatus } from '@/features/study';
 
 export default function DeckDetailPage() {
   const params = useParams();
@@ -42,6 +42,7 @@ export default function DeckDetailPage() {
   
   const { data: deck, isLoading, error } = useDeckById(deckId);
   const { deleteDeck } = useDeckOperations();
+  const { data: dueCount } = useDueCardsCount(deckId);
 
   const handleBack = () => {
     router.push('/decks');
@@ -52,11 +53,15 @@ export default function DeckDetailPage() {
   };
 
   const handleStudy = () => {
-    router.push(`/study/decks/${deckId}`);
+    // Navigate to practice page with deckId in query params
+    router.push(`/practice?deckId=${deckId}`);
   };
 
+
+
   const handlePractice = () => {
-    router.push(`/practice/decks/${deckId}`);
+    // Navigate to practice page with deckId in query params  
+    router.push(`/practice?deckId=${deckId}`);
   };
 
   const handleShare = () => {
@@ -132,10 +137,11 @@ export default function DeckDetailPage() {
               Back
             </Button>
             
-            <Button onClick={handleStudy} className="flex items-center gap-2">
-              <Play className="h-4 w-4" />
-              Study
-            </Button>
+            <StudyButton 
+              dueCount={dueCount}
+              onClick={handleStudy}
+              className="flex items-center gap-2"
+            />
 
             {isOwner && (
               <Button variant="outline" onClick={handleEdit}>
@@ -205,6 +211,7 @@ export default function DeckDetailPage() {
                   <Clock className="h-4 w-4" />
                   Updated {new Date(deck.updatedAt).toLocaleDateString()}
                 </span>
+                <StudyStatus dueCount={dueCount} />
               </div>
             </div>
             {deck.coverImageUrl && (
@@ -286,6 +293,17 @@ export default function DeckDetailPage() {
                 <p className="text-xs text-muted-foreground">Study time</p>
               </CardContent>
             </Card>
+            
+            {dueCount && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-base">Study Status</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <StudyStatus dueCount={dueCount} variant="detailed" />
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
 
