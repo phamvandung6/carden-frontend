@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { DeckForm } from './deck-form';
 import { useCreateDeck, useUpdateDeck } from '../hooks/use-decks';
 import { formDataToCreateRequest, formDataToUpdateRequest } from '../utils/deck-utils';
+import { DecksApi } from '../services/decks-api';
 import type { Deck, DeckFormData } from '../types';
 
 interface DeckFormPageProps {
@@ -22,7 +23,7 @@ export function DeckFormPage({ deck, onSuccess, backUrl = '/decks' }: DeckFormPa
   const isEditing = !!deck;
 
   const createDeckMutation = useCreateDeck();
-  const updateDeckMutation = useUpdateDeck();
+  const updateDeckMutation = useUpdateDeck({ silent: true }); // Silent for image upload updates
 
   const handleSubmit = async (formData: DeckFormData) => {
     try {
@@ -49,10 +50,37 @@ export function DeckFormPage({ deck, onSuccess, backUrl = '/decks' }: DeckFormPa
         const response = await createDeckMutation.mutateAsync(createData);
 
         if (response.success && response.data) {
+          const newDeck = response.data;
+          
+          // If user selected a cover image (blob URL), upload it
+          if (formData.coverImageUrl && formData.coverImageUrl.startsWith('blob:')) {
+            try {
+              // Convert blob URL back to File object
+              const imageResponse = await fetch(formData.coverImageUrl);
+              const imageBlob = await imageResponse.blob();
+              const imageFile = new File([imageBlob], 'cover-image.jpg', { type: imageBlob.type });
+              
+              // Upload the image
+              const publicUrl = await DecksApi.uploadDeckThumbnail(newDeck.id, imageFile);
+              
+              // Update deck with the real image URL
+              await updateDeckMutation.mutateAsync({
+                id: newDeck.id,
+                data: { coverImageUrl: publicUrl }
+              });
+              
+              // Update the deck object with new image URL
+              newDeck.coverImageUrl = publicUrl;
+            } catch (uploadError) {
+              console.error('Failed to upload cover image:', uploadError);
+              // Continue anyway - deck was created successfully
+            }
+          }
+          
           if (onSuccess) {
-            onSuccess(response.data);
+            onSuccess(newDeck);
           } else {
-            router.push(`/decks/${response.data.id}`);
+            router.push(`/decks/${newDeck.id}`);
           }
         }
       }

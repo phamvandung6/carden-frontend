@@ -40,8 +40,8 @@ apiClient.interceptors.response.use(
       console.log(`API Request: ${response.config.method?.toUpperCase()} ${response.config.url} - ${duration}ms`);
     }
     
-    // Return the response itself (don't unwrap response.data automatically)
-    return response;
+    // Return the response data directly (assumes API returns ApiResponse format)
+    return response.data;
   },
   (error: AxiosError) => {
     // Transform axios error to our ApiError format

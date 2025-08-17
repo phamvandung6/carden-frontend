@@ -36,7 +36,9 @@ export function usePublicDecks(params: DeckSearchParams = {}) {
           const { content, totalElements, totalPages, number } = response.data;
           
           // Transform DeckCardData[] to Deck[] (extract deck info)
-          const decks: Deck[] = content.map(card => ({
+          const decks: Deck[] = content
+            .filter(card => card.deckId) // Filter out cards without deckId
+            .map(card => ({
             id: card.deckId,
             title: card.deckTitle,
             description: '', // Not available in search response
@@ -76,8 +78,9 @@ export function usePublicDecks(params: DeckSearchParams = {}) {
         setLoading(false);
       }
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000, // 2 minutes (public data can be cached longer)
+    refetchOnWindowFocus: false, // Public data doesn't change as often
+    refetchOnMount: 'always', // Always refetch on component mount
   });
 }
 
@@ -108,38 +111,14 @@ export function useMyDecks(params: DeckSearchParams = {}) {
         setError(null);
         
         const response = await DecksApi.searchMyDecks(params);
-        console.log('🔍 useMyDecks response:', response);
         
         if (response.success && response.data) {
           const { content, totalElements, totalPages, number } = response.data;
           
-          // Transform DeckCardData[] to Deck[] (extract deck info)
-          const decks: Deck[] = content.map(card => ({
-            id: card.deckId,
-            title: card.deckTitle,
-            description: '', // Not available in search response
-            userId: 0, // Current user
-            topicId: null,
-            visibility: 'PRIVATE' as const, // User's decks default to private
-            cefrLevel: null,
-            sourceLanguage: '',
-            targetLanguage: '',
-            coverImageUrl: card.frontImageUrl || null,
-            tags: [],
-            systemDeck: false,
-            downloadCount: 0,
-            likeCount: 0,
-            cardCount: 1, // At least this card
-            createdAt: '',
-            updatedAt: ''
-          }));
+          // API now returns Deck[] directly, no transformation needed
+          const decks: Deck[] = content;
 
-          // Remove duplicates based on deckId
-          const uniqueDecks = decks.filter((deck, index, self) => 
-            index === self.findIndex(d => d.id === deck.id)
-          );
-
-          setDecks(uniqueDecks);
+          setDecks(decks);
           setPagination(number, totalPages, totalElements);
           
           return response.data;
@@ -154,8 +133,9 @@ export function useMyDecks(params: DeckSearchParams = {}) {
         setLoading(false);
       }
     },
-    staleTime: 2 * 60 * 1000, // 2 minutes (fresher for user's own data)
-    refetchOnWindowFocus: false,
+    staleTime: 30 * 1000, // 30 seconds (fresher for user's own data)
+    refetchOnWindowFocus: true, // Refetch when user comes back to tab
+    refetchOnMount: 'always', // Always refetch on component mount
   });
 }
 
@@ -192,9 +172,12 @@ export function useCreateDeck() {
         addDeck(response.data);
         toast.success('Deck created successfully!');
         
-        // Invalidate and refetch queries
+        // Invalidate and refetch queries immediately
         queryClient.invalidateQueries({ queryKey: DECK_QUERY_KEYS.myDecks() });
         queryClient.invalidateQueries({ queryKey: DECK_QUERY_KEYS.lists() });
+        
+        // Force refetch to ensure fresh data
+        queryClient.refetchQueries({ queryKey: DECK_QUERY_KEYS.myDecks() });
       } else {
         throw new Error(response.message || 'Failed to create deck');
       }
@@ -207,7 +190,7 @@ export function useCreateDeck() {
 }
 
 // Hook for updating decks
-export function useUpdateDeck() {
+export function useUpdateDeck(options?: { silent?: boolean }) {
   const queryClient = useQueryClient();
   const { updateDeck } = useDecksStore();
 
@@ -217,12 +200,19 @@ export function useUpdateDeck() {
     onSuccess: (response, variables) => {
       if (response.success && response.data) {
         updateDeck(response.data);
-        toast.success('Deck updated successfully!');
+        
+        // Only show toast if not silent
+        if (!options?.silent) {
+          toast.success('Deck updated successfully!');
+        }
         
         // Invalidate specific queries
         queryClient.invalidateQueries({ queryKey: DECK_QUERY_KEYS.detail(variables.id) });
         queryClient.invalidateQueries({ queryKey: DECK_QUERY_KEYS.myDecks() });
         queryClient.invalidateQueries({ queryKey: DECK_QUERY_KEYS.lists() });
+        
+        // Force refetch for updated data
+        queryClient.refetchQueries({ queryKey: DECK_QUERY_KEYS.myDecks() });
       } else {
         throw new Error(response.message || 'Failed to update deck');
       }

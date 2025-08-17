@@ -8,7 +8,7 @@ export function deckToFormData(deck: Deck): DeckFormData {
     title: deck.title,
     description: deck.description || '',
     topicId: deck.topicId,
-    cefrLevel: deck.cefrLevel,
+    cefrLevel: deck.cefrLevel, // Keep as null if null
     sourceLanguage: deck.sourceLanguage || '',
     targetLanguage: deck.targetLanguage || '',
     tags: deck.tags || [],
@@ -21,16 +21,42 @@ export function deckToFormData(deck: Deck): DeckFormData {
  * Transform form data to create/update request
  */
 export function formDataToCreateRequest(formData: DeckFormData) {
-  return {
+  const request: any = {
     title: formData.title.trim(),
-    description: formData.description?.trim() || undefined,
-    topicId: formData.topicId || undefined,
-    cefrLevel: formData.cefrLevel || undefined,
-    sourceLanguage: formData.sourceLanguage?.trim() || undefined,
-    targetLanguage: formData.targetLanguage?.trim() || undefined,
-    tags: formData.tags?.filter(tag => tag.trim().length > 0) || undefined,
-    coverImageUrl: formData.coverImageUrl || undefined,
   };
+
+  // Only include fields that have values
+  if (formData.description?.trim()) {
+    request.description = formData.description.trim();
+  }
+  
+  if (formData.topicId) {
+    request.topicId = formData.topicId;
+  }
+  
+  // Only include cefrLevel if user selected an actual level (not null)
+  if (formData.cefrLevel) {
+    request.cefrLevel = formData.cefrLevel;
+  }
+  
+  if (formData.sourceLanguage?.trim()) {
+    request.sourceLanguage = formData.sourceLanguage.trim();
+  }
+  
+  if (formData.targetLanguage?.trim()) {
+    request.targetLanguage = formData.targetLanguage.trim();
+  }
+  
+  if (formData.tags?.length && formData.tags.some(tag => tag.trim())) {
+    request.tags = formData.tags.filter(tag => tag.trim().length > 0);
+  }
+  
+  // Don't include blob URLs in the request - they will be handled separately
+  if (formData.coverImageUrl && !formData.coverImageUrl.startsWith('blob:')) {
+    request.coverImageUrl = formData.coverImageUrl;
+  }
+
+  return request;
 }
 
 /**

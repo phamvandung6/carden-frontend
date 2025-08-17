@@ -25,15 +25,14 @@ export class DecksApi {
     if (params.size !== undefined) searchParams.append('size', params.size.toString());
     if (params.sort) searchParams.append('sort', params.sort);
 
-    const response = await apiClient.get(`/v1/decks?${searchParams.toString()}`);
-    return response.data;
+    return apiClient.get(`/v1/decks?${searchParams.toString()}`);
   }
 
   /**
    * Search user's own decks (authentication required)
    * GET /v1/decks/me
    */
-  static async searchMyDecks(params: DeckSearchParams = {}): Promise<ApiResponse<PageableResponse<DeckCardData>>> {
+  static async searchMyDecks(params: DeckSearchParams = {}): Promise<ApiResponse<PageableResponse<Deck>>> {
     const searchParams = new URLSearchParams();
     
     if (params.q) searchParams.append('q', params.q);
@@ -43,8 +42,7 @@ export class DecksApi {
     if (params.size !== undefined) searchParams.append('size', params.size.toString());
     if (params.sort) searchParams.append('sort', params.sort);
 
-    const response = await apiClient.get(`/v1/decks/me?${searchParams.toString()}`);
-    return response.data;
+    return apiClient.get(`/v1/decks/me?${searchParams.toString()}`);
   }
 
   /**
@@ -52,8 +50,7 @@ export class DecksApi {
    * POST /v1/decks
    */
   static async createDeck(data: CreateDeckRequest): Promise<ApiResponse<Deck>> {
-    const response = await apiClient.post('/v1/decks', data);
-    return response.data;
+    return apiClient.post('/v1/decks', data);
   }
 
   /**
@@ -61,8 +58,7 @@ export class DecksApi {
    * GET /v1/decks/{id}
    */
   static async getDeckById(id: number): Promise<ApiResponse<Deck>> {
-    const response = await apiClient.get(`/v1/decks/${id}`);
-    return response.data;
+    return apiClient.get(`/v1/decks/${id}`);
   }
 
   /**
@@ -70,8 +66,7 @@ export class DecksApi {
    * PATCH /v1/decks/{id}
    */
   static async updateDeck(id: number, data: UpdateDeckRequest): Promise<ApiResponse<Deck>> {
-    const response = await apiClient.patch(`/v1/decks/${id}`, data);
-    return response.data;
+    return apiClient.patch(`/v1/decks/${id}`, data);
   }
 
   /**
@@ -79,8 +74,7 @@ export class DecksApi {
    * DELETE /v1/decks/{id}
    */
   static async deleteDeck(id: number): Promise<ApiResponse<{ message: string }>> {
-    const response = await apiClient.delete(`/v1/decks/${id}`);
-    return response.data;
+    return apiClient.delete(`/v1/decks/${id}`);
   }
 
   /**
@@ -92,8 +86,7 @@ export class DecksApi {
     contentType: string
   ): Promise<ApiResponse<PresignedUploadResponse>> {
     const params = new URLSearchParams({ contentType });
-    const response = await apiClient.post(`/v1/decks/${deckId}/thumbnail/presign?${params.toString()}`);
-    return response.data;
+    return apiClient.post(`/v1/decks/${deckId}/thumbnail/presign?${params.toString()}`);
   }
 
   /**
@@ -105,8 +98,7 @@ export class DecksApi {
     publicUrl: string
   ): Promise<ApiResponse<string>> {
     const params = new URLSearchParams({ publicUrl });
-    const response = await apiClient.post(`/v1/decks/${deckId}/thumbnail/confirm?${params.toString()}`);
-    return response.data;
+    return apiClient.post(`/v1/decks/${deckId}/thumbnail/confirm?${params.toString()}`);
   }
 
   /**

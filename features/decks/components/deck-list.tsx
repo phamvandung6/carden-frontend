@@ -366,7 +366,7 @@ export function DeckList({
           ? 'grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
           : 'space-y-3'
       )}>
-        {decks.map((deck) => (
+        {decks.map((deck, index) => (
           <div key={deck.id} className="relative">
             {showBulkActions && (
               <div className="absolute top-2 left-2 z-10">

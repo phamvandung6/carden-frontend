@@ -145,7 +145,7 @@ export function DeckCardGridSkeleton({
       className
     )}>
       {Array.from({ length: count }, (_, i) => (
-        <DeckCardSkeleton key={i} variant={variant} />
+        <DeckCardSkeleton key={`skeleton-${variant}-${i}`} variant={variant} />
       ))}
     </div>
   );

@@ -241,14 +241,18 @@ export function DeckForm({ deck, onSubmit, onCancel, loading = false, error }: D
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>CEFR Level</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value || ''} disabled={loading}>
+                  <Select 
+                    onValueChange={(value) => field.onChange(value === '__none__' ? null : value)} 
+                    value={field.value || '__none__'} 
+                    disabled={loading}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select difficulty level" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">No specific level</SelectItem>
+                      <SelectItem value="__none__">No specific level</SelectItem>
                       {CEFR_LEVEL_OPTIONS.map((option) => (
                         <SelectItem key={option.value} value={option.value}>
                           <div className="flex flex-col">
