@@ -1,43 +1,19 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef, memo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import {
-  Grid3X3,
-  List,
-  MoreVertical,
-  Trash2,
-  Share,
-  Download,
-  Copy,
-  Eye,
-  Plus,
-  RefreshCw
-} from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
 import type { Deck, DeckFilters } from '../types';
-import { DeckCard } from './deck-card';
-import { DeckCardSkeleton, DeckCardGridSkeleton } from './deck-card-skeleton';
+import { DeckCardGridSkeleton } from './deck-card-skeleton';
 import { DeckEmptyState } from './deck-empty-state';
 import { DeckFiltersComponent } from './deck-filters';
+import { DeckListToolbar } from './deck-list-toolbar';
+import { DeckListGrid } from './deck-list-grid';
+import { DeckListPagination } from './deck-list-pagination';
+import { DeckListBulkSelector } from './deck-list-bulk-selector';
 import { useDeckFilters } from '../hooks/use-deck-filters';
 
 type ViewMode = 'grid' | 'list';
@@ -70,7 +46,7 @@ interface DeckListProps {
   initialFilters?: Partial<DeckFilters>;
 }
 
-export function DeckList({
+export const DeckList = memo(function DeckList({
   decks,
   loading = false,
   error,
@@ -98,21 +74,50 @@ export function DeckList({
 }: DeckListProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [selectedDecks, setSelectedDecks] = useState<Set<number>>(new Set());
-
+  
+  // Initialize filters without search initially
+  const filtersWithoutSearch = { ...initialFilters };
+  delete filtersWithoutSearch.search;
+  
   const {
     filters,
+    debouncedSearch,
     updateFilter,
     updateFilters,
     resetFilters,
     hasActiveFilters,
     activeFilterCount,
-  } = useDeckFilters({ initialFilters });
+  } = useDeckFilters({ 
+    initialFilters: filtersWithoutSearch,
+    debounceMs: 300 
+  });
 
-  // Handle internal filter changes and notify parent
+  // Track only debouncedSearch for parent notification
+  const prevDebouncedSearchRef = useRef(debouncedSearch);
+  
+  useEffect(() => {
+    if (debouncedSearch !== prevDebouncedSearchRef.current) {
+      prevDebouncedSearchRef.current = debouncedSearch;
+      onFiltersChange?.({
+        ...filters,
+        search: debouncedSearch,
+      });
+    }
+  }, [debouncedSearch, filters, onFiltersChange]);
+
+  // Handle internal filter changes (non-search only to avoid loops)
   const handleInternalFiltersChange = useCallback((newFilters: Partial<DeckFilters>) => {
     updateFilters(newFilters);
-    onFiltersChange?.({ ...filters, ...newFilters });
-  }, [filters, updateFilters, onFiltersChange]);
+    
+    // Only notify parent immediately for non-search filters
+    if (!newFilters.hasOwnProperty('search')) {
+      onFiltersChange?.({
+        ...filters,
+        ...newFilters,
+        search: debouncedSearch,
+      });
+    }
+  }, [updateFilters, filters, debouncedSearch, onFiltersChange]);
 
   // Selection handlers
   const handleSelectAll = (checked: boolean) => {
@@ -143,21 +148,7 @@ export function DeckList({
     setSelectedDecks(new Set());
   };
 
-  // Get page numbers for pagination
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisiblePages = 5;
-    const start = Math.max(0, currentPage - Math.floor(maxVisiblePages / 2));
-    const end = Math.min(totalPages, start + maxVisiblePages);
 
-    for (let i = start; i < end; i++) {
-      pages.push(i);
-    }
-    return pages;
-  };
-
-  const isAllSelected = selectedDecks.size > 0 && selectedDecks.size === decks.length;
-  const isIndeterminate = selectedDecks.size > 0 && selectedDecks.size < decks.length;
 
   // Handle loading state
   if (loading) {
@@ -191,35 +182,29 @@ export function DeckList({
     );
   }
 
-  // Handle empty state
+    // Handle empty state
   if (!loading && decks.length === 0) {
-    if (hasActiveFilters) {
-      return (
-        <div className={cn('space-y-6', className)}>
-          {showFilters && (
-                      <DeckFiltersComponent
+    const emptyStateType = hasActiveFilters 
+      ? 'no-search-results' 
+      : (variant === 'public-decks' ? 'no-public-decks' : 'no-decks');
+
+    return (
+      <div className={cn('space-y-6', className)}>
+        {/* ALWAYS render filters when showFilters is true */}
+        {showFilters && (
+          <DeckFiltersComponent
             filters={filters}
             onFiltersChange={handleInternalFiltersChange}
             onResetFilters={resetFilters}
             hasActiveFilters={hasActiveFilters}
             activeFilterCount={activeFilterCount}
           />
-          )}
-          <DeckEmptyState
-            type="no-search-results"
-            onCreateDeck={onCreateDeck}
-            onClearFilters={resetFilters}
-          />
-        </div>
-      );
-    }
-
-    const emptyType = variant === 'public-decks' ? 'no-public-decks' : 'no-decks';
-    return (
-      <div className={cn('space-y-6', className)}>
+        )}
+        
         <DeckEmptyState
-          type={emptyType}
+          type={emptyStateType}
           onCreateDeck={onCreateDeck}
+          onClearFilters={hasActiveFilters ? resetFilters : undefined}
         />
       </div>
     );
@@ -239,199 +224,51 @@ export function DeckList({
       )}
 
       {/* Toolbar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          {/* Results count */}
-          <div className="text-sm text-muted-foreground">
-            {totalItems > 0 ? (
-              <>
-                Showing {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, totalItems)} of {totalItems} decks
-              </>
-            ) : (
-              'No decks found'
-            )}
-          </div>
-
-          {/* Bulk actions */}
-          {showBulkActions && selectedDecks.size > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">
-                {selectedDecks.size} selected
-              </span>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <MoreVertical className="h-4 w-4 mr-2" />
-                    Actions
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => handleBulkAction('duplicate')}>
-                    <Copy className="mr-2 h-4 w-4" />
-                    Duplicate
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleBulkAction('share')}>
-                    <Share className="mr-2 h-4 w-4" />
-                    Share
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleBulkAction('export')}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Export
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={() => handleBulkAction('delete')}
-                    className="text-destructive"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* Page size selector */}
-          <Select 
-            value={pageSize.toString()} 
-            onValueChange={(value) => onPageSizeChange?.(parseInt(value))}
-          >
-            <SelectTrigger className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="12">12</SelectItem>
-              <SelectItem value="24">24</SelectItem>
-              <SelectItem value="48">48</SelectItem>
-              <SelectItem value="96">96</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* View mode toggle */}
-          <div className="flex border rounded-md">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="rounded-r-none"
-            >
-              <Grid3X3 className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="rounded-l-none"
-            >
-              <List className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Refresh button */}
-          {onRefresh && (
-            <Button variant="outline" size="sm" onClick={onRefresh}>
-              <RefreshCw className="h-4 w-4" />
-            </Button>
-          )}
-
-          {/* Create deck button */}
-          {onCreateDeck && variant === 'my-decks' && (
-            <Button onClick={onCreateDeck} size="sm">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Deck
-            </Button>
-          )}
-        </div>
-      </div>
+      <DeckListToolbar
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        selectedCount={selectedDecks.size}
+        totalItems={totalItems}
+        pageSize={pageSize}
+        onPageSizeChange={onPageSizeChange}
+        onRefresh={onRefresh}
+        onCreateDeck={onCreateDeck}
+        onBulkAction={handleBulkAction}
+        variant={variant}
+        showBulkActions={showBulkActions}
+        hasActiveFilters={hasActiveFilters}
+        activeFilterCount={activeFilterCount}
+      />
 
       {/* Bulk selection header */}
-      {showBulkActions && decks.length > 0 && (
-        <div className="flex items-center gap-2 p-2 bg-muted/30 rounded-lg">
-          <Checkbox
-            checked={isAllSelected}
-            onCheckedChange={handleSelectAll}
-            className={cn(isIndeterminate && 'data-[state=checked]:bg-primary')}
-          />
-          <span className="text-sm">
-            Select all decks
-          </span>
-        </div>
-      )}
+      <DeckListBulkSelector
+        totalCount={decks.length}
+        selectedCount={selectedDecks.size}
+        onSelectAll={handleSelectAll}
+        show={showBulkActions}
+      />
 
       {/* Deck Grid/List */}
-      <div className={cn(
-        viewMode === 'grid'
-          ? 'grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-          : 'space-y-3'
-      )}>
-        {decks.map((deck, index) => (
-          <div key={deck.id} className="relative">
-            {showBulkActions && (
-              <div className="absolute top-2 left-2 z-10">
-                <Checkbox
-                  checked={selectedDecks.has(deck.id)}
-                  onCheckedChange={(checked) => handleSelectDeck(deck.id, !!checked)}
-                  className="bg-background border-2"
-                />
-              </div>
-            )}
-            <DeckCard
-              deck={deck}
-              currentUserId={currentUserId}
-              onEdit={onEditDeck}
-              onDelete={onDeleteDeck}
-              onDuplicate={onDuplicateDeck}
-              onShare={onShareDeck}
-              onDownload={onDownloadDeck}
-              variant={viewMode === 'list' ? 'compact' : 'default'}
-              showActions={!selectedDecks.has(deck.id)}
-              className={cn(
-                showBulkActions && selectedDecks.has(deck.id) && 'ring-2 ring-primary'
-              )}
-            />
-          </div>
-        ))}
-      </div>
+      <DeckListGrid
+        decks={decks}
+        viewMode={viewMode}
+        currentUserId={currentUserId}
+        selectedDecks={selectedDecks}
+        showBulkActions={showBulkActions}
+        onSelectDeck={handleSelectDeck}
+        onEdit={onEditDeck}
+        onDelete={onDeleteDeck}
+        onDuplicate={onDuplicateDeck}
+        onShare={onShareDeck}
+        onDownload={onDownloadDeck}
+      />
 
       {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious 
-                  onClick={() => onPageChange?.(Math.max(0, currentPage - 1))}
-                  className={cn(
-                    currentPage === 0 && 'pointer-events-none opacity-50'
-                  )}
-                />
-              </PaginationItem>
-
-              {getPageNumbers().map((page) => (
-                <PaginationItem key={page}>
-                  <PaginationLink
-                    onClick={() => onPageChange?.(page)}
-                    isActive={page === currentPage}
-                  >
-                    {page + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-
-              <PaginationItem>
-                <PaginationNext 
-                  onClick={() => onPageChange?.(Math.min(totalPages - 1, currentPage + 1))}
-                  className={cn(
-                    currentPage >= totalPages - 1 && 'pointer-events-none opacity-50'
-                  )}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
+      <DeckListPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={onPageChange}
+      />
     </div>
   );
-}
+});

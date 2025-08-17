@@ -34,6 +34,9 @@ interface DecksStore {
   
   setPagination: (currentPage: number, totalPages: number, totalItems: number) => void;
   
+  // BATCH UPDATE to prevent multiple re-renders
+  batchUpdateListState: (updates: Partial<DeckListState>) => void;
+  
   setViewMode: (mode: 'grid' | 'list') => void;
   
   // Bulk selection
@@ -164,6 +167,12 @@ export const useDecksStore = create<DecksStore>()(
             totalItems
           }
         }), false, 'setPagination'),
+
+      // BATCH UPDATE to prevent multiple re-renders
+      batchUpdateListState: (updates) =>
+        set((state) => ({
+          listState: { ...state.listState, ...updates }
+        }), false, 'batchUpdateListState'),
 
       // View mode
       setViewMode: (mode) =>

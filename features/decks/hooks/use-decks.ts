@@ -21,14 +21,14 @@ export const DECK_QUERY_KEYS = {
 
 // Hook for searching public decks
 export function usePublicDecks(params: DeckSearchParams = {}) {
-  const { setDecks, setLoading, setError, setPagination } = useDecksStore();
+  const { batchUpdateListState } = useDecksStore();
 
   return useQuery({
     queryKey: DECK_QUERY_KEYS.list(params),
     queryFn: async () => {
       try {
-        setLoading(true);
-        setError(null);
+        // Start loading state
+        batchUpdateListState({ loading: true, error: null });
         
         const response = await DecksApi.searchPublicDecks(params);
         
@@ -63,8 +63,15 @@ export function usePublicDecks(params: DeckSearchParams = {}) {
             index === self.findIndex(d => d.id === deck.id)
           );
 
-          setDecks(uniqueDecks);
-          setPagination(number, totalPages, totalElements);
+          // BATCH UPDATE - Single re-render instead of 3 separate ones!
+          batchUpdateListState({
+            decks: uniqueDecks,
+            currentPage: number,
+            totalPages,
+            totalItems: totalElements,
+            loading: false,
+            error: null
+          });
           
           return response.data;
         }
@@ -72,10 +79,10 @@ export function usePublicDecks(params: DeckSearchParams = {}) {
         throw new Error(response.message || 'Failed to fetch decks');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to fetch decks';
-        setError(errorMessage);
+        
+        // Batch error state
+        batchUpdateListState({ loading: false, error: errorMessage });
         throw error;
-      } finally {
-        setLoading(false);
       }
     },
     staleTime: 2 * 60 * 1000, // 2 minutes (public data can be cached longer)
@@ -101,14 +108,14 @@ export function useDeckById(deckId: number) {
 
 // Hook for searching user's decks
 export function useMyDecks(params: DeckSearchParams = {}) {
-  const { setDecks, setLoading, setError, setPagination } = useDecksStore();
+  const { batchUpdateListState } = useDecksStore();
 
   return useQuery({
     queryKey: DECK_QUERY_KEYS.myDecksList(params),
     queryFn: async () => {
       try {
-        setLoading(true);
-        setError(null);
+        // Start loading state
+        batchUpdateListState({ loading: true, error: null });
         
         const response = await DecksApi.searchMyDecks(params);
         
@@ -118,8 +125,15 @@ export function useMyDecks(params: DeckSearchParams = {}) {
           // API now returns Deck[] directly, no transformation needed
           const decks: Deck[] = content;
 
-          setDecks(decks);
-          setPagination(number, totalPages, totalElements);
+          // BATCH UPDATE - Single re-render instead of 3 separate ones!
+          batchUpdateListState({
+            decks,
+            currentPage: number,
+            totalPages,
+            totalItems: totalElements,
+            loading: false,
+            error: null
+          });
           
           return response.data;
         }
@@ -127,10 +141,10 @@ export function useMyDecks(params: DeckSearchParams = {}) {
         throw new Error(response.message || 'Failed to fetch your decks');
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to fetch your decks';
-        setError(errorMessage);
+        
+        // Batch error state  
+        batchUpdateListState({ loading: false, error: errorMessage });
         throw error;
-      } finally {
-        setLoading(false);
       }
     },
     staleTime: 30 * 1000, // 30 seconds (fresher for user's own data)
