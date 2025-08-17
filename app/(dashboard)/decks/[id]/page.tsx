@@ -3,7 +3,7 @@
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
@@ -33,6 +33,7 @@ import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/ui/page-header';
 import { useDeckById, useDeckOperations } from '@/features/decks';
+import { CardList } from '@/features/flashcards';
 
 export default function DeckDetailPage() {
   const params = useParams();
@@ -253,21 +254,7 @@ export default function DeckDetailPage() {
         </TabsList>
 
         <TabsContent value="cards" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Flashcards</CardTitle>
-              <CardDescription>
-                Cards in this deck ({deck.cardCount || 0} total)
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Card management interface coming soon</p>
-                                  <p className="text-sm">You&apos;ll be able to add, edit, and organize cards here</p>
-              </div>
-            </CardContent>
-          </Card>
+          <CardList deckId={deckId} deckTitle={deck.title} />
         </TabsContent>
 
         <TabsContent value="stats" className="space-y-4">
