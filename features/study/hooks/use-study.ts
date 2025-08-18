@@ -84,8 +84,10 @@ export function useDueCards(params: DueCardsQueryParams = {}) {
       await getDueCards(params);
       return { cards: dueCards, pagination: dueCardsPagination };
     },
-    staleTime: 60000, // 1 minute
-    refetchOnWindowFocus: false
+    staleTime: 10000, // 10 seconds - faster updates for study cards
+    refetchOnWindowFocus: true, // Refetch when user returns to tab
+    refetchInterval: 15000, // Auto-refetch every 15 seconds
+    refetchIntervalInBackground: false
   });
 
   return {

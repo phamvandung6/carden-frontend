@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, BookOpen, Globe, Users } from 'lucide-react';
+import { Plus, BookOpen, Globe } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { DeckListContainer } from '@/features/decks';
@@ -39,47 +39,7 @@ export default function DecksPage() {
         }
       />
 
-      {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">My Decks</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">12</div>
-            <p className="text-xs text-muted-foreground">
-              +2 from last month
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Cards</CardTitle>
-            <Globe className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">284</div>
-            <p className="text-xs text-muted-foreground">
-              +25 from last week
-            </p>
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Study Streak</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">7 days</div>
-            <p className="text-xs text-muted-foreground">
-              Keep it up!
-            </p>
-          </CardContent>
-        </Card>
-      </div>
 
       {/* Deck Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

@@ -71,13 +71,8 @@ export function DeckForm({ deck, onSubmit, onCancel, loading = false, error }: D
   };
 
   return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle>
-          {isEditing ? 'Edit Deck' : 'Create New Deck'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Card className="w-full shadow-lg border-0 bg-background">
+      <CardContent className="px-6 sm:px-8 pt-6">
         <Form {...form}>
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
             {/* Error Display */}
@@ -98,8 +93,8 @@ export function DeckForm({ deck, onSubmit, onCancel, loading = false, error }: D
             {/* Tags Field */}
             <DeckTagsField form={form} loading={loading} />
 
-            {/* Visibility Field */}
-            <DeckVisibilityField form={form} loading={loading} />
+            {/* Visibility Field - Only show when editing */}
+            {isEditing && <DeckVisibilityField form={form} loading={loading} />}
 
             {/* Cover Image Field */}
             <DeckImageField form={form} loading={loading} />

@@ -37,8 +37,11 @@ export function DeckListContainer({
   );
 
   const { deleteDeck } = useDeckOperations();
+  
+  // Get variant-specific state from store
   const { 
-    listState: { decks, loading, error, totalPages, totalItems } 
+    myDecksState, 
+    publicDecksState 
   } = useDecksStore();
 
   // Use appropriate hook based on variant
@@ -55,6 +58,10 @@ export function DeckListContainer({
   });
 
   const currentQuery = variant === 'public-decks' ? publicDecksQuery : myDecksQuery;
+  
+  // Get data from variant-specific store state
+  const currentState = variant === 'public-decks' ? publicDecksState : myDecksState;
+  const { decks, loading, error, totalPages, totalItems } = currentState;
 
   // Handle filters change
   const handleFiltersChange = useCallback((filters: DeckFilters) => {

@@ -104,41 +104,33 @@ export function DeckFormPage({ deck, onSuccess, backUrl = '/decks' }: DeckFormPa
   const isLoading = createDeckMutation.isPending || updateDeckMutation.isPending;
 
   return (
-    <div className="container max-w-4xl py-6">
-      {/* Header */}
-      <div className="mb-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push(backUrl)}
-          className="mb-4"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Decks
-        </Button>
-        
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            {isEditing ? 'Edit Deck' : 'Create New Deck'}
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {isEditing 
-              ? 'Update your deck information and settings.'
-              : 'Create a new deck to organize your vocabulary cards.'
-            }
-          </p>
+    <div className="min-h-screen bg-muted/30">
+      <div className="container mx-auto max-w-5xl py-6 px-6 sm:px-8">
+        {/* Back Button - Left Aligned */}
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push(backUrl)}
+            className="text-left"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Decks
+          </Button>
         </div>
-      </div>
 
-      {/* Form */}
-      <div className="flex justify-center">
-        <DeckForm
-          deck={deck}
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-          loading={isLoading}
-          error={error}
-        />
+        {/* Form - Centered with proper spacing */}
+        <div className="flex justify-center items-start px-4">
+          <div className="w-full max-w-3xl">
+            <DeckForm
+              deck={deck}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              loading={isLoading}
+              error={error}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

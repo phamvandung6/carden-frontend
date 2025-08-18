@@ -38,8 +38,11 @@ function getStudyButtonInfo(dueCount?: DueCardsCount): StudyButtonInfo {
   // Calculate total available cards (due + new + learning)
   const totalAvailable = dueCount.totalDue + dueCount.newCards + dueCount.learningCards;
   
-  // If there are any cards available for study
-  if (totalAvailable > 0 || dueCount.hasCardsAvailable) {
+  // If there are any cards available for study OR if it's ready now
+  // This aligns with NextReviewInfo logic that shows "Ready now"
+  const isReadyNow = dueCount.minutesUntilNext <= 0 || !dueCount.nextCardAvailableAt;
+  
+  if (totalAvailable > 0 || dueCount.hasCardsAvailable || isReadyNow) {
     return { 
       text: dueCount.totalDue > 0 
         ? `Study (${dueCount.totalDue})` 

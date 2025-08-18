@@ -15,7 +15,7 @@ export class DecksApi {
    * Search public decks (no authentication required)
    * GET /v1/decks
    */
-  static async searchPublicDecks(params: DeckSearchParams = {}): Promise<ApiResponse<PageableResponse<DeckCardData>>> {
+  static async searchPublicDecks(params: DeckSearchParams = {}): Promise<ApiResponse<PageableResponse<Deck>>> {
     const searchParams = new URLSearchParams();
     
     if (params.q) searchParams.append('q', params.q);

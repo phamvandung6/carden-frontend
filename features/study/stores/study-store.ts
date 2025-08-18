@@ -148,6 +148,7 @@ export const useStudyStore = create<StudyStoreImpl>()(
             set((state) => {
               state.currentSession = defaultSessionState;
               state.currentCard = null;
+              state.dueCardsCount = null; // Reset due cards count to force refetch
               state.isLoading = false;
             });
 

@@ -21,51 +21,26 @@ export const DECK_QUERY_KEYS = {
 
 // Hook for searching public decks
 export function usePublicDecks(params: DeckSearchParams = {}) {
-  const { batchUpdateListState } = useDecksStore();
+  const { batchUpdatePublicDecksState } = useDecksStore();
 
   return useQuery({
     queryKey: DECK_QUERY_KEYS.list(params),
     queryFn: async () => {
       try {
         // Start loading state
-        batchUpdateListState({ loading: true, error: null });
+        batchUpdatePublicDecksState({ loading: true, error: null });
         
         const response = await DecksApi.searchPublicDecks(params);
         
         if (response.success && response.data) {
           const { content, totalElements, totalPages, number } = response.data;
           
-          // Transform DeckCardData[] to Deck[] (extract deck info)
-          const decks: Deck[] = content
-            .filter(card => card.deckId) // Filter out cards without deckId
-            .map(card => ({
-            id: card.deckId,
-            title: card.deckTitle,
-            description: '', // Not available in search response
-            userId: 0, // Not available in search response
-            topicId: null,
-            visibility: 'PUBLIC' as const,
-            cefrLevel: null,
-            sourceLanguage: '',
-            targetLanguage: '',
-            coverImageUrl: card.frontImageUrl || null,
-            tags: [],
-            systemDeck: false,
-            downloadCount: 0,
-            likeCount: 0,
-            cardCount: 1, // At least this card
-            createdAt: '',
-            updatedAt: ''
-          }));
-
-          // Remove duplicates based on deckId
-          const uniqueDecks = decks.filter((deck, index, self) => 
-            index === self.findIndex(d => d.id === deck.id)
-          );
+          // API returns Deck[] directly, no transformation needed
+          const decks: Deck[] = content;
 
           // BATCH UPDATE - Single re-render instead of 3 separate ones!
-          batchUpdateListState({
-            decks: uniqueDecks,
+          batchUpdatePublicDecksState({
+            decks,
             currentPage: number,
             totalPages,
             totalItems: totalElements,
@@ -81,7 +56,7 @@ export function usePublicDecks(params: DeckSearchParams = {}) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to fetch decks';
         
         // Batch error state
-        batchUpdateListState({ loading: false, error: errorMessage });
+        batchUpdatePublicDecksState({ loading: false, error: errorMessage });
         throw error;
       }
     },
@@ -108,14 +83,14 @@ export function useDeckById(deckId: number) {
 
 // Hook for searching user's decks
 export function useMyDecks(params: DeckSearchParams = {}) {
-  const { batchUpdateListState } = useDecksStore();
+  const { batchUpdateMyDecksState } = useDecksStore();
 
   return useQuery({
     queryKey: DECK_QUERY_KEYS.myDecksList(params),
     queryFn: async () => {
       try {
         // Start loading state
-        batchUpdateListState({ loading: true, error: null });
+        batchUpdateMyDecksState({ loading: true, error: null });
         
         const response = await DecksApi.searchMyDecks(params);
         
@@ -126,7 +101,7 @@ export function useMyDecks(params: DeckSearchParams = {}) {
           const decks: Deck[] = content;
 
           // BATCH UPDATE - Single re-render instead of 3 separate ones!
-          batchUpdateListState({
+          batchUpdateMyDecksState({
             decks,
             currentPage: number,
             totalPages,
@@ -143,7 +118,7 @@ export function useMyDecks(params: DeckSearchParams = {}) {
         const errorMessage = error instanceof Error ? error.message : 'Failed to fetch your decks';
         
         // Batch error state  
-        batchUpdateListState({ loading: false, error: errorMessage });
+        batchUpdateMyDecksState({ loading: false, error: errorMessage });
         throw error;
       }
     },

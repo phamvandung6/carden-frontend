@@ -90,13 +90,20 @@ export const queryKeys = {
   // Analytics queries
   analytics: {
     all: ['analytics'] as const,
-    dashboard: () => [...queryKeys.analytics.all, 'dashboard'] as const,
-    progress: (timeframe: string) => [...queryKeys.analytics.all, 'progress', timeframe] as const,
-    performance: (deckId?: string) => 
-      deckId 
-        ? [...queryKeys.analytics.all, 'performance', deckId] as const
+    overview: () => [...queryKeys.analytics.all, 'overview'] as const,
+    simplifiedOverview: () => [...queryKeys.analytics.all, 'overview', 'simplified'] as const,
+    performance: (params?: Record<string, unknown>) => 
+      params 
+        ? [...queryKeys.analytics.all, 'performance', params] as const
         : [...queryKeys.analytics.all, 'performance'] as const,
     streaks: () => [...queryKeys.analytics.all, 'streaks'] as const,
+    deckStats: (deckId: number) => [...queryKeys.analytics.all, 'deck-stats', deckId] as const,
+    multipleDeckStats: (deckIds: number[]) => [...queryKeys.analytics.all, 'deck-stats', 'multiple', deckIds] as const,
+    summary: () => [...queryKeys.analytics.all, 'summary'] as const,
+    insights: () => [...queryKeys.analytics.all, 'insights'] as const,
+    // Deprecated - for backward compatibility
+    dashboard: () => [...queryKeys.analytics.all, 'dashboard'] as const,
+    progress: (timeframe: string) => [...queryKeys.analytics.all, 'progress', timeframe] as const,
     achievements: () => [...queryKeys.analytics.all, 'achievements'] as const,
   },
 

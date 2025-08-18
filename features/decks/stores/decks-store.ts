@@ -3,8 +3,9 @@ import { devtools } from 'zustand/middleware';
 import type { Deck, DeckFilters, DeckListState, ImageUploadState } from '../types';
 
 interface DecksStore {
-  // List state
-  listState: DeckListState;
+  // Separate list states for each variant
+  myDecksState: DeckListState;
+  publicDecksState: DeckListState;
   
   // Current deck being edited
   currentDeck: Deck | null;
@@ -18,24 +19,32 @@ interface DecksStore {
   isCreating: boolean;
   isEditing: boolean;
   
-  // Actions
-  setDecks: (decks: Deck[]) => void;
+  // Actions for specific variants
+  setMyDecks: (decks: Deck[]) => void;
+  setPublicDecks: (decks: Deck[]) => void;
   addDeck: (deck: Deck) => void;
   updateDeck: (deck: Deck) => void;
   removeDeck: (deckId: number) => void;
   
   setCurrentDeck: (deck: Deck | null) => void;
   
-  setLoading: (loading: boolean) => void;
-  setError: (error: string | null) => void;
+  // Variant-specific state updates
+  setMyDecksLoading: (loading: boolean) => void;
+  setMyDecksError: (error: string | null) => void;
+  setPublicDecksLoading: (loading: boolean) => void;
+  setPublicDecksError: (error: string | null) => void;
   
-  setFilters: (filters: Partial<DeckFilters>) => void;
-  resetFilters: () => void;
+  setMyDecksFilters: (filters: Partial<DeckFilters>) => void;
+  setPublicDecksFilters: (filters: Partial<DeckFilters>) => void;
+  resetMyDecksFilters: () => void;
+  resetPublicDecksFilters: () => void;
   
-  setPagination: (currentPage: number, totalPages: number, totalItems: number) => void;
+  setMyDecksPagination: (currentPage: number, totalPages: number, totalItems: number) => void;
+  setPublicDecksPagination: (currentPage: number, totalPages: number, totalItems: number) => void;
   
   // BATCH UPDATE to prevent multiple re-renders
-  batchUpdateListState: (updates: Partial<DeckListState>) => void;
+  batchUpdateMyDecksState: (updates: Partial<DeckListState>) => void;
+  batchUpdatePublicDecksState: (updates: Partial<DeckListState>) => void;
   
   setViewMode: (mode: 'grid' | 'list') => void;
   
@@ -79,8 +88,9 @@ const initialImageUploadState: ImageUploadState = {
 export const useDecksStore = create<DecksStore>()(
   devtools(
     (set, get) => ({
-      // Initial state
-      listState: initialListState,
+      // Initial state - separate for each variant
+      myDecksState: initialListState,
+      publicDecksState: initialListState,
       currentDeck: null,
       imageUpload: initialImageUploadState,
       viewMode: 'grid',
@@ -88,26 +98,37 @@ export const useDecksStore = create<DecksStore>()(
       isCreating: false,
       isEditing: false,
 
-      // Deck list actions
-      setDecks: (decks) =>
+      // Variant-specific deck list actions
+      setMyDecks: (decks) =>
         set((state) => ({
-          listState: { ...state.listState, decks }
-        }), false, 'setDecks'),
+          myDecksState: { ...state.myDecksState, decks }
+        }), false, 'setMyDecks'),
+
+      setPublicDecks: (decks) =>
+        set((state) => ({
+          publicDecksState: { ...state.publicDecksState, decks }
+        }), false, 'setPublicDecks'),
 
       addDeck: (deck) =>
         set((state) => ({
-          listState: {
-            ...state.listState,
-            decks: [deck, ...state.listState.decks],
-            totalItems: state.listState.totalItems + 1
+          myDecksState: {
+            ...state.myDecksState,
+            decks: [deck, ...state.myDecksState.decks],
+            totalItems: state.myDecksState.totalItems + 1
           }
         }), false, 'addDeck'),
 
       updateDeck: (updatedDeck) =>
         set((state) => ({
-          listState: {
-            ...state.listState,
-            decks: state.listState.decks.map(deck =>
+          myDecksState: {
+            ...state.myDecksState,
+            decks: state.myDecksState.decks.map(deck =>
+              deck.id === updatedDeck.id ? updatedDeck : deck
+            )
+          },
+          publicDecksState: {
+            ...state.publicDecksState,
+            decks: state.publicDecksState.decks.map(deck =>
               deck.id === updatedDeck.id ? updatedDeck : deck
             )
           },
@@ -116,10 +137,15 @@ export const useDecksStore = create<DecksStore>()(
 
       removeDeck: (deckId) =>
         set((state) => ({
-          listState: {
-            ...state.listState,
-            decks: state.listState.decks.filter(deck => deck.id !== deckId),
-            totalItems: Math.max(0, state.listState.totalItems - 1)
+          myDecksState: {
+            ...state.myDecksState,
+            decks: state.myDecksState.decks.filter(deck => deck.id !== deckId),
+            totalItems: Math.max(0, state.myDecksState.totalItems - 1)
+          },
+          publicDecksState: {
+            ...state.publicDecksState,
+            decks: state.publicDecksState.decks.filter(deck => deck.id !== deckId),
+            totalItems: Math.max(0, state.publicDecksState.totalItems - 1)
           },
           currentDeck: state.currentDeck?.id === deckId ? null : state.currentDeck,
           selectedDeckIds: new Set([...state.selectedDeckIds].filter(id => id !== deckId))
@@ -129,50 +155,91 @@ export const useDecksStore = create<DecksStore>()(
       setCurrentDeck: (deck) =>
         set({ currentDeck: deck }, false, 'setCurrentDeck'),
 
-      // Loading and error
-      setLoading: (loading) =>
+      // Variant-specific loading and error
+      setMyDecksLoading: (loading) =>
         set((state) => ({
-          listState: { ...state.listState, loading }
-        }), false, 'setLoading'),
+          myDecksState: { ...state.myDecksState, loading }
+        }), false, 'setMyDecksLoading'),
 
-      setError: (error) =>
+      setMyDecksError: (error) =>
         set((state) => ({
-          listState: { ...state.listState, error }
-        }), false, 'setError'),
+          myDecksState: { ...state.myDecksState, error }
+        }), false, 'setMyDecksError'),
 
-      // Filters
-      setFilters: (newFilters) =>
+      setPublicDecksLoading: (loading) =>
         set((state) => ({
-          listState: {
-            ...state.listState,
-            filters: { ...state.listState.filters, ...newFilters }
+          publicDecksState: { ...state.publicDecksState, loading }
+        }), false, 'setPublicDecksLoading'),
+
+      setPublicDecksError: (error) =>
+        set((state) => ({
+          publicDecksState: { ...state.publicDecksState, error }
+        }), false, 'setPublicDecksError'),
+
+      // Variant-specific filters
+      setMyDecksFilters: (newFilters) =>
+        set((state) => ({
+          myDecksState: {
+            ...state.myDecksState,
+            filters: { ...state.myDecksState.filters, ...newFilters }
           }
-        }), false, 'setFilters'),
+        }), false, 'setMyDecksFilters'),
 
-      resetFilters: () =>
+      setPublicDecksFilters: (newFilters) =>
         set((state) => ({
-          listState: {
-            ...state.listState,
+          publicDecksState: {
+            ...state.publicDecksState,
+            filters: { ...state.publicDecksState.filters, ...newFilters }
+          }
+        }), false, 'setPublicDecksFilters'),
+
+      resetMyDecksFilters: () =>
+        set((state) => ({
+          myDecksState: {
+            ...state.myDecksState,
             filters: initialListState.filters
           }
-        }), false, 'resetFilters'),
+        }), false, 'resetMyDecksFilters'),
 
-      // Pagination
-      setPagination: (currentPage, totalPages, totalItems) =>
+      resetPublicDecksFilters: () =>
         set((state) => ({
-          listState: {
-            ...state.listState,
+          publicDecksState: {
+            ...state.publicDecksState,
+            filters: initialListState.filters
+          }
+        }), false, 'resetPublicDecksFilters'),
+
+      // Variant-specific pagination
+      setMyDecksPagination: (currentPage, totalPages, totalItems) =>
+        set((state) => ({
+          myDecksState: {
+            ...state.myDecksState,
             currentPage,
             totalPages,
             totalItems
           }
-        }), false, 'setPagination'),
+        }), false, 'setMyDecksPagination'),
+
+      setPublicDecksPagination: (currentPage, totalPages, totalItems) =>
+        set((state) => ({
+          publicDecksState: {
+            ...state.publicDecksState,
+            currentPage,
+            totalPages,
+            totalItems
+          }
+        }), false, 'setPublicDecksPagination'),
 
       // BATCH UPDATE to prevent multiple re-renders
-      batchUpdateListState: (updates) =>
+      batchUpdateMyDecksState: (updates) =>
         set((state) => ({
-          listState: { ...state.listState, ...updates }
-        }), false, 'batchUpdateListState'),
+          myDecksState: { ...state.myDecksState, ...updates }
+        }), false, 'batchUpdateMyDecksState'),
+
+      batchUpdatePublicDecksState: (updates) =>
+        set((state) => ({
+          publicDecksState: { ...state.publicDecksState, ...updates }
+        }), false, 'batchUpdatePublicDecksState'),
 
       // View mode
       setViewMode: (mode) =>
@@ -215,7 +282,8 @@ export const useDecksStore = create<DecksStore>()(
       // Reset
       reset: () =>
         set({
-          listState: initialListState,
+          myDecksState: initialListState,
+          publicDecksState: initialListState,
           currentDeck: null,
           imageUpload: initialImageUploadState,
           viewMode: 'grid',
@@ -228,20 +296,22 @@ export const useDecksStore = create<DecksStore>()(
       name: 'decks-store',
       partialize: (state: DecksStore) => ({
         viewMode: state.viewMode,
-        listState: {
-          filters: state.listState.filters
+        myDecksState: {
+          filters: state.myDecksState.filters
+        },
+        publicDecksState: {
+          filters: state.publicDecksState.filters
         }
       })
     }
   )
 );
 
-// Selectors for easier access
-export const useDecks = () => useDecksStore(state => state.listState.decks);
-export const useDecksLoading = () => useDecksStore(state => state.listState.loading);
-export const useDecksError = () => useDecksStore(state => state.listState.error);
+// Variant-specific selectors for easier access  
+export const useMyDecksState = () => useDecksStore(state => state.myDecksState);
+export const usePublicDecksState = () => useDecksStore(state => state.publicDecksState);
+
 export const useCurrentDeck = () => useDecksStore(state => state.currentDeck);
-export const useDecksFilters = () => useDecksStore(state => state.listState.filters);
 export const useDecksViewMode = () => useDecksStore(state => state.viewMode);
 export const useSelectedDecks = () => useDecksStore(state => state.selectedDeckIds);
 export const useImageUploadState = () => useDecksStore(state => state.imageUpload);

@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/features/auth';
+import { useMyDecks } from '@/features/decks';
 
 interface SidebarProps {
   className?: string;
@@ -39,7 +40,9 @@ export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { data: myDecksData, isLoading: decksLoading } = useMyDecks();
 
+  // Generate navigation dynamically based on data
   const navigation: NavItem[] = [
     {
       title: 'Dashboard',
@@ -50,7 +53,7 @@ export function Sidebar({ className }: SidebarProps) {
       title: 'My Decks',
       href: '/decks',
       icon: BookOpen,
-      badge: '12', // This would come from actual data
+      badge: decksLoading ? '...' : myDecksData?.content?.length || 0,
       children: [
         { title: 'All Decks', href: '/decks', icon: BookOpen },
         { title: 'Recent', href: '/decks/recent', icon: Clock },
@@ -78,11 +81,7 @@ export function Sidebar({ className }: SidebarProps) {
         { title: 'Timed Practice', href: '/practice/timed', icon: Clock },
       ]
     },
-    {
-      title: 'Analytics',
-      href: '/analytics',
-      icon: BarChart3,
-    },
+
     {
       title: 'Settings',
       href: '/settings',

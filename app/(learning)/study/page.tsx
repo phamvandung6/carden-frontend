@@ -1,13 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Play, Calendar, BarChart3, Clock } from 'lucide-react';
+import { Play, Calendar, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  DueCardsContainer, 
-  SRSDashboardContainer, 
   ReviewScheduler,
   NextReviewInfo,
   StudyStatus
@@ -15,7 +11,6 @@ import {
 import { useDueCardsCount } from '@/features/study';
 
 export default function StudyPage() {
-  const [activeTab, setActiveTab] = useState('due-cards');
   const { data: dueCount } = useDueCardsCount();
 
   const handleStartQuickSession = async () => {
@@ -129,39 +124,14 @@ export default function StudyPage() {
         </Card>
       )}
 
-      {/* Main Content */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="due-cards" className="flex items-center gap-2">
-            <Play className="w-4 h-4" />
-            Due Cards
-          </TabsTrigger>
-          <TabsTrigger value="dashboard" className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4" />
-            Dashboard
-          </TabsTrigger>
-          <TabsTrigger value="schedule" className="flex items-center gap-2">
-            <Calendar className="w-4 h-4" />
-            Schedule
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="due-cards" className="space-y-6">
-          <DueCardsContainer 
-            onStartSession={() => {
-              window.location.href = '/practice';
-            }}
-          />
-        </TabsContent>
-
-        <TabsContent value="dashboard" className="space-y-6">
-          <SRSDashboardContainer />
-        </TabsContent>
-
-        <TabsContent value="schedule" className="space-y-6">
-          <ReviewScheduler />
-        </TabsContent>
-      </Tabs>
+      {/* Review Schedule */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-2">
+          <Calendar className="w-5 h-5" />
+          <h2 className="text-xl font-semibold">Review Schedule</h2>
+        </div>
+        <ReviewScheduler />
+      </div>
     </div>
   );
 }

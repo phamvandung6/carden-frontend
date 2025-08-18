@@ -67,7 +67,7 @@ export function DeckListToolbar({
       <div className="flex items-center gap-4">
         {/* Results info */}
         <div className="text-sm text-muted-foreground">
-          {totalItems > 0 ? (
+          {totalItems > 0 && (
             <>
               Showing {totalItems} {totalItems === 1 ? 'deck' : 'decks'}
               {hasActiveFilters && activeFilterCount > 0 && (
@@ -76,8 +76,6 @@ export function DeckListToolbar({
                 </span>
               )}
             </>
-          ) : (
-            'No decks found'
           )}
         </div>
 
@@ -164,13 +162,7 @@ export function DeckListToolbar({
           </Button>
         )}
 
-        {/* Create button */}
-        {onCreateDeck && variant === 'my-decks' && (
-          <Button size="sm" onClick={onCreateDeck}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Deck
-          </Button>
-        )}
+
       </div>
     </div>
   );

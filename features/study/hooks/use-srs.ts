@@ -125,6 +125,9 @@ export function useSRS(): UseSRSReturn {
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: SRS_QUERY_KEYS.dueCount() });
       queryClient.invalidateQueries({ queryKey: SRS_QUERY_KEYS.dueCards() });
+      
+      // Force refetch due cards count immediately after each review
+      queryClient.refetchQueries({ queryKey: SRS_QUERY_KEYS.dueCount() });
     },
     onError: (error: any) => {
       toast.error('Failed to submit review');
@@ -153,6 +156,9 @@ export function useSRS(): UseSRSReturn {
       queryClient.invalidateQueries({ queryKey: SRS_QUERY_KEYS.dueCount() });
       queryClient.invalidateQueries({ queryKey: SRS_QUERY_KEYS.dueCards() });
       
+      // Force refetch due cards count immediately
+      queryClient.refetchQueries({ queryKey: SRS_QUERY_KEYS.dueCount() });
+      
       return summary;
     },
     onError: (error: any) => {
@@ -169,8 +175,10 @@ export function useSRS(): UseSRSReturn {
   const { data: dueCountData } = useQuery({
     queryKey: SRS_QUERY_KEYS.dueCount(),
     queryFn: () => StudyApi.getDueCardsCount(),
-    staleTime: 30000, // 30 seconds
-    refetchOnWindowFocus: false
+    staleTime: 5000, // 5 seconds - more responsive
+    refetchOnWindowFocus: true, // Refetch when user comes back to tab
+    refetchInterval: 10000, // Auto-refetch every 10 seconds for SRS updates
+    refetchIntervalInBackground: false // Only when tab is active
   });
 
   // Update store when due count data changes
@@ -222,8 +230,10 @@ export function useDueCardsCount(deckId?: number) {
   return useQuery({
     queryKey: SRS_QUERY_KEYS.dueCount(deckId),
     queryFn: () => getDueCardsCount(deckId),
-    staleTime: 30000, // 30 seconds
-    refetchOnWindowFocus: false
+    staleTime: 5000, // 5 seconds - more responsive for study state changes
+    refetchOnWindowFocus: true, // Refetch when user comes back to tab
+    refetchInterval: 10000, // Auto-refetch every 10 seconds to catch SRS timer updates
+    refetchIntervalInBackground: false // Only when tab is active
   });
 }
 
@@ -255,6 +265,9 @@ export function useStartSession() {
       // Invalidate current session and due count
       queryClient.invalidateQueries({ queryKey: SRS_QUERY_KEYS.currentSession() });
       queryClient.invalidateQueries({ queryKey: SRS_QUERY_KEYS.dueCount() });
+      
+      // Force refetch due cards count
+      queryClient.refetchQueries({ queryKey: SRS_QUERY_KEYS.dueCount() });
     },
     onError: (error: any) => {
       toast.error('Failed to start practice session');
@@ -286,6 +299,9 @@ export function useSubmitReview() {
       // Invalidate related queries
       queryClient.invalidateQueries({ queryKey: SRS_QUERY_KEYS.dueCount() });
       queryClient.invalidateQueries({ queryKey: SRS_QUERY_KEYS.dueCards() });
+      
+      // Force refetch due cards count
+      queryClient.refetchQueries({ queryKey: SRS_QUERY_KEYS.dueCount() });
     },
     onError: (error: any) => {
       toast.error('Failed to submit review');

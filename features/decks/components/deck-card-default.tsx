@@ -56,8 +56,8 @@ export function DeckCardDefault({
   };
 
   return (
-    <Card className={cn('hover:shadow-md transition-shadow cursor-pointer group', className)}>
-      <Link href={cardHref} className="block">
+    <Card className={cn('hover:shadow-md transition-shadow cursor-pointer group h-80 flex flex-col', className)}>
+      <Link href={cardHref} className="block h-full flex flex-col">
         {/* Thumbnail */}
         <div className="relative p-3">
           <DeckCardThumbnail
@@ -108,7 +108,7 @@ export function DeckCardDefault({
           )}
         </div>
 
-        <CardHeader className="pb-3 pt-4">
+        <CardHeader className="pb-3 pt-4 flex-1 flex flex-col">
           <div className="flex items-start justify-between gap-3 min-w-0">
             <h3 className="font-medium text-base leading-tight truncate flex-1 min-w-0">
               {deck.title}
@@ -119,14 +119,17 @@ export function DeckCardDefault({
               </Badge>
             )}
           </div>
-          {deck.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mt-2 break-words">
-              {deck.description}
-            </p>
-          )}
+          {/* Fixed height description area to ensure consistent card heights */}
+          <div className="h-10 mt-2">
+            {deck.description && (
+              <p className="text-sm text-muted-foreground line-clamp-2 break-words">
+                {deck.description}
+              </p>
+            )}
+          </div>
         </CardHeader>
 
-        <CardContent className="pt-0">
+        <CardContent className="pt-0 mt-auto">
           {/* Tags */}
           {deck.tags && deck.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mb-3 min-w-0">

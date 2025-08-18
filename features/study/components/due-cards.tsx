@@ -117,58 +117,7 @@ function DueCardItem({
   );
 }
 
-/**
- * Component to display due cards count summary
- */
-function DueCardsSummary({ deckId }: { deckId?: number }) {
-  const { data: dueCount, isLoading } = useDueCardsCount(deckId);
 
-  if (isLoading) {
-    return (
-      <Card className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-6 w-32" />
-          </div>
-          <Skeleton className="h-10 w-20" />
-        </div>
-      </Card>
-    );
-  }
-
-  if (!dueCount) {
-    return null;
-  }
-
-  return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="font-medium text-lg mb-2">Study Summary</h3>
-          <div className="flex gap-4 text-sm">
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span>{dueCount.totalDue} due</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span>{dueCount.newCards} new</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-              <span>{dueCount.learningCards} learning</span>
-            </div>
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-2xl font-bold text-primary">{dueCount.totalDue}</div>
-          <div className="text-sm text-muted-foreground">cards to study</div>
-        </div>
-      </div>
-    </Card>
-  );
-}
 
 /**
  * Main due cards list component
@@ -201,7 +150,6 @@ export function DueCards({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <DueCardsSummary />
         {Array.from({ length: 5 }).map((_, i) => (
           <Card key={i} className="p-4">
             <div className="flex items-start justify-between">
@@ -227,27 +175,22 @@ export function DueCards({
 
   if (!cards || cards.length === 0) {
     return (
-      <div className="space-y-4">
-        <DueCardsSummary />
-        <Card className="p-8 text-center">
-          <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">No cards to study</h3>
-          <p className="text-muted-foreground mb-4">
-            Great job! You're all caught up with your reviews.
-          </p>
-          <Button variant="outline" onClick={() => window.location.reload()}>
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Refresh
-          </Button>
-        </Card>
-      </div>
+      <Card className="p-8 text-center">
+        <BookOpen className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+        <h3 className="text-lg font-medium mb-2">No cards to study</h3>
+        <p className="text-muted-foreground mb-4">
+          Great job! You're all caught up with your reviews.
+        </p>
+        <Button variant="outline" onClick={() => window.location.reload()}>
+          <RotateCcw className="w-4 h-4 mr-2" />
+          Refresh
+        </Button>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-4">
-      <DueCardsSummary />
-      
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">
           Cards to Study ({cards.length})
