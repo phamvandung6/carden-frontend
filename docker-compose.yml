@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  carden-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - NEXT_PUBLIC_API_URL=http://104.214.171.2:8080/api
+    restart: unless-stopped
+    # Uncomment if you want to use .env.production file instead
+    # env_file:
+    #   - .env.production
