@@ -34,7 +34,7 @@ import { toast } from 'sonner';
 import { PageHeader } from '@/components/ui/page-header';
 import { useDeckById, useDeckOperations, AiGenerateDialog } from '@/features/decks';
 import { CardList } from '@/features/flashcards';
-import { useDueCardsCount, StudyButton, StudyStatus } from '@/features/study';
+import { useDueCardsCount, StudyStatus } from '@/features/study';
 
 export default function DeckDetailPage() {
   const params = useParams();
@@ -54,8 +54,8 @@ export default function DeckDetailPage() {
   };
 
   const handleStudy = () => {
-    // Navigate to practice page with deckId in query params
-    router.push(`/practice?deckId=${deckId}`);
+    // Navigate to client study page for local practice
+    router.push(`/client-study?deckId=${deckId}`);
   };
 
 
@@ -138,11 +138,10 @@ export default function DeckDetailPage() {
               Back
             </Button>
             
-            <StudyButton 
-              dueCount={dueCount}
-              onClick={handleStudy}
-              className="flex items-center gap-2"
-            />
+            <Button onClick={handleStudy} className="bg-green-600 hover:bg-green-700 text-white">
+              <BookOpen className="h-4 w-4 mr-2" />
+              Study Cards
+            </Button>
 
             {isOwner && (
               <Button variant="outline" onClick={handleEdit}>
@@ -158,9 +157,13 @@ export default function DeckDetailPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={handleStudy}>
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Study Cards (Local)
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handlePractice}>
                   <Target className="mr-2 h-4 w-4" />
-                  Practice Mode
+                  Practice Mode (SRS)
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {isOwner && (

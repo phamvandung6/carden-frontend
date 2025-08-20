@@ -11,7 +11,6 @@ import {
   BookOpen, 
   GraduationCap, 
   Target, 
-  BarChart3, 
   Settings,
   ChevronLeft,
   ChevronRight,
