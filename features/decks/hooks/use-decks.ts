@@ -6,7 +6,8 @@ import type {
   CreateDeckRequest, 
   UpdateDeckRequest, 
   DeckSearchParams, 
-  Deck 
+  Deck,
+  AiGenerateCardsRequest
 } from '../types';
 
 // Query keys
@@ -278,22 +279,116 @@ export function useUploadThumbnail() {
   });
 }
 
+// Hook for AI card generation
+export function useAiGenerateCards() {
+  const queryClient = useQueryClient();
+  const { setAiGenerationState, resetAiGeneration, aiGeneration } = useDecksStore();
+
+  return useMutation({
+    mutationFn: async ({ deckId, data }: { deckId: number; data: AiGenerateCardsRequest }) => {
+      // Start generation
+      setAiGenerationState({ 
+        isGenerating: true, 
+        progress: 10, 
+        error: null 
+      });
+
+      try {
+        // Simulate progress updates during API call
+        const progressInterval = setInterval(() => {
+          setAiGenerationState({ 
+            progress: Math.min(aiGeneration.progress + 15, 85) 
+          });
+        }, 1000);
+
+        const response = await DecksApi.generateCardsWithAi(deckId, data);
+        
+        clearInterval(progressInterval);
+
+        if (response.success && response.data) {
+          setAiGenerationState({ 
+            progress: 100,
+            lastResult: response.data 
+          });
+          
+          return response.data;
+        } else {
+          throw new Error(response.message || 'Failed to generate cards');
+        }
+      } catch (error) {
+        throw error;
+      }
+    },
+    onSuccess: (result, variables) => {
+      // Complete generation
+      setAiGenerationState({ 
+        isGenerating: false,
+        progress: 100 
+      });
+      
+      // Show success notification
+      toast.success(
+        `Successfully generated ${result.totalSaved} cards!`, 
+        {
+          description: `Topic: ${result.summary.topic} • Processing time: ${Math.round(result.processingTimeMs / 1000)}s`,
+          duration: 6000,
+        }
+      );
+
+      // Invalidate related queries to refresh card lists
+      queryClient.invalidateQueries({ 
+        queryKey: ['cards', variables.deckId] 
+      });
+      queryClient.invalidateQueries({ 
+        queryKey: DECK_QUERY_KEYS.detail(variables.deckId) 
+      });
+
+      // Reset generation state after a delay
+      setTimeout(() => {
+        resetAiGeneration();
+      }, 3000);
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Failed to generate cards';
+      
+      setAiGenerationState({ 
+        isGenerating: false, 
+        error: message,
+        progress: 0 
+      });
+      
+      toast.error('AI Card Generation Failed', {
+        description: message,
+        duration: 8000,
+      });
+
+      // Reset error state after a delay
+      setTimeout(() => {
+        resetAiGeneration();
+      }, 5000);
+    },
+  });
+}
+
 // Convenience hook for common deck operations
 export function useDeckOperations() {
   const createDeck = useCreateDeck();
   const updateDeck = useUpdateDeck();
   const deleteDeck = useDeleteDeck();
   const uploadThumbnail = useUploadThumbnail();
+  const aiGenerateCards = useAiGenerateCards();
 
   return {
     createDeck,
     updateDeck,
     deleteDeck,
     uploadThumbnail,
+    aiGenerateCards,
     isLoading: 
       createDeck.isPending || 
       updateDeck.isPending || 
       deleteDeck.isPending ||
-      uploadThumbnail.isPending,
+      uploadThumbnail.isPending ||
+      aiGenerateCards.isPending,
   };
 }

@@ -19,7 +19,8 @@ import {
   Target,
   Globe,
   Lock,
-  Eye
+  Eye,
+  Sparkles
 } from 'lucide-react';
 import { 
   DropdownMenu, 
@@ -31,7 +32,7 @@ import {
 import { toast } from 'sonner';
 
 import { PageHeader } from '@/components/ui/page-header';
-import { useDeckById, useDeckOperations } from '@/features/decks';
+import { useDeckById, useDeckOperations, AiGenerateDialog } from '@/features/decks';
 import { CardList } from '@/features/flashcards';
 import { useDueCardsCount, StudyButton, StudyStatus } from '@/features/study';
 
@@ -161,6 +162,15 @@ export default function DeckDetailPage() {
                   <Target className="mr-2 h-4 w-4" />
                   Practice Mode
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {isOwner && (
+                  <AiGenerateDialog deckId={deckId} deckTitle={deck.title}>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Generate with AI
+                    </DropdownMenuItem>
+                  </AiGenerateDialog>
+                )}
                 <DropdownMenuItem onClick={handleShare}>
                   <Share2 className="mr-2 h-4 w-4" />
                   Share
@@ -261,7 +271,11 @@ export default function DeckDetailPage() {
         </TabsList>
 
         <TabsContent value="cards" className="space-y-4">
-          <CardList deckId={deckId} deckTitle={deck.title} />
+          <CardList 
+            deckId={deckId} 
+            deckTitle={deck.title} 
+            onStudy={handleStudy}
+          />
         </TabsContent>
 
         <TabsContent value="stats" className="space-y-4">

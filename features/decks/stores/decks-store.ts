@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import type { Deck, DeckFilters, DeckListState, ImageUploadState } from '../types';
+import type { Deck, DeckFilters, DeckListState, ImageUploadState, AiGenerationState } from '../types';
 
 interface DecksStore {
   // Separate list states for each variant
@@ -12,6 +12,9 @@ interface DecksStore {
   
   // Image upload state
   imageUpload: ImageUploadState;
+  
+  // AI generation state
+  aiGeneration: AiGenerationState;
   
   // UI state
   viewMode: 'grid' | 'list';
@@ -57,6 +60,10 @@ interface DecksStore {
   setImageUploadState: (state: Partial<ImageUploadState>) => void;
   resetImageUpload: () => void;
   
+  // AI generation
+  setAiGenerationState: (state: Partial<AiGenerationState>) => void;
+  resetAiGeneration: () => void;
+  
   // Modal states
   setCreating: (isCreating: boolean) => void;
   setEditing: (isEditing: boolean) => void;
@@ -85,6 +92,13 @@ const initialImageUploadState: ImageUploadState = {
   previewUrl: null
 };
 
+const initialAiGenerationState: AiGenerationState = {
+  isGenerating: false,
+  progress: 0,
+  error: null,
+  lastResult: null
+};
+
 export const useDecksStore = create<DecksStore>()(
   devtools(
     (set, get) => ({
@@ -93,6 +107,7 @@ export const useDecksStore = create<DecksStore>()(
       publicDecksState: initialListState,
       currentDeck: null,
       imageUpload: initialImageUploadState,
+      aiGeneration: initialAiGenerationState,
       viewMode: 'grid',
       selectedDeckIds: new Set(),
       isCreating: false,
@@ -272,6 +287,15 @@ export const useDecksStore = create<DecksStore>()(
       resetImageUpload: () =>
         set({ imageUpload: initialImageUploadState }, false, 'resetImageUpload'),
 
+      // AI generation
+      setAiGenerationState: (newState) =>
+        set((state) => ({
+          aiGeneration: { ...state.aiGeneration, ...newState }
+        }), false, 'setAiGenerationState'),
+
+      resetAiGeneration: () =>
+        set({ aiGeneration: initialAiGenerationState }, false, 'resetAiGeneration'),
+
       // Modal states
       setCreating: (isCreating) =>
         set({ isCreating }, false, 'setCreating'),
@@ -286,6 +310,7 @@ export const useDecksStore = create<DecksStore>()(
           publicDecksState: initialListState,
           currentDeck: null,
           imageUpload: initialImageUploadState,
+          aiGeneration: initialAiGenerationState,
           viewMode: 'grid',
           selectedDeckIds: new Set(),
           isCreating: false,
@@ -315,3 +340,4 @@ export const useCurrentDeck = () => useDecksStore(state => state.currentDeck);
 export const useDecksViewMode = () => useDecksStore(state => state.viewMode);
 export const useSelectedDecks = () => useDecksStore(state => state.selectedDeckIds);
 export const useImageUploadState = () => useDecksStore(state => state.imageUpload);
+export const useAiGenerationState = () => useDecksStore(state => state.aiGeneration);

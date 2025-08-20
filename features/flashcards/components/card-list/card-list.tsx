@@ -15,9 +15,10 @@ import { CardListPagination } from './card-list-pagination';
 interface CardListProps {
   deckId: number;
   deckTitle?: string;
+  onStudy?: () => void;
 }
 
-export function CardList({ deckId, deckTitle }: CardListProps) {
+export function CardList({ deckId, deckTitle, onStudy }: CardListProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingCard, setEditingCard] = useState<CardType | null>(null);
@@ -77,6 +78,9 @@ export function CardList({ deckId, deckTitle }: CardListProps) {
           searchQuery={searchQuery}
           onSearchChange={handleSearchChange}
           onCreateCard={() => setShowCreateForm(true)}
+          deckId={deckId}
+          deckTitle={deckTitle}
+          onStudy={onStudy}
         />
         
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
@@ -104,6 +108,9 @@ export function CardList({ deckId, deckTitle }: CardListProps) {
         searchQuery={searchQuery}
         onSearchChange={handleSearchChange}
         onCreateCard={() => setShowCreateForm(true)}
+        deckId={deckId}
+        deckTitle={deckTitle}
+        onStudy={onStudy}
       />
 
       {cards.length === 0 ? (
@@ -112,6 +119,8 @@ export function CardList({ deckId, deckTitle }: CardListProps) {
           onCreateCard={() => setShowCreateForm(true)}
           isSearching={!!searchQuery}
           searchQuery={searchQuery}
+          deckId={deckId}
+          onStudy={onStudy}
         />
       ) : (
         <>

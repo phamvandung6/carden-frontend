@@ -202,3 +202,38 @@ export interface DeckStats {
     updated: number;
   };
 }
+
+// AI Generate Cards types
+export interface AiGenerateCardsRequest {
+  topic: string;
+  count?: number; // 1-15, default 10
+}
+
+export interface AiGenerateCardsResponse {
+  success: boolean;
+  message: string;
+  totalRequested: number;
+  totalGenerated: number;
+  totalSaved: number;
+  deckId: number;
+  errors: string[] | null;
+  warnings: string[] | null;
+  processedAt: string;
+  processingTimeMs: number;
+  summary: {
+    topic: string;
+    sourceLanguage: string;
+    targetLanguage: string;
+    cefrLevel: string | null;
+    duplicatesSkipped: number;
+    validationErrors: number;
+  };
+}
+
+// AI Generation state for UI
+export interface AiGenerationState {
+  isGenerating: boolean;
+  progress: number;
+  error: string | null;
+  lastResult: AiGenerateCardsResponse | null;
+}

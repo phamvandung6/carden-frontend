@@ -7,7 +7,9 @@ import type {
   UpdateDeckRequest,
   DeckSearchParams,
   PageableResponse,
-  PresignedUploadResponse
+  PresignedUploadResponse,
+  AiGenerateCardsRequest,
+  AiGenerateCardsResponse
 } from '../types';
 
 export class DecksApi {
@@ -158,6 +160,19 @@ export class DecksApi {
       throw error;
     }
   }
+
+  /**
+   * Generate cards using AI for a specific deck
+   * POST /v1/decks/{deckId}/cards/bulk-generate
+   */
+  static async generateCardsWithAi(
+    deckId: number,
+    data: AiGenerateCardsRequest
+  ): Promise<ApiResponse<AiGenerateCardsResponse>> {
+    return apiClient.post(`/v1/decks/${deckId}/cards/bulk-generate`, data, {
+      timeout: 60000, // 60 seconds timeout for AI generation
+    });
+  }
 }
 
 // Export individual methods for easier mocking in tests
@@ -171,5 +186,6 @@ export const {
   getPresignedUploadUrl,
   confirmThumbnailUpload,
   uploadFile,
-  uploadDeckThumbnail
+  uploadDeckThumbnail,
+  generateCardsWithAi
 } = DecksApi;

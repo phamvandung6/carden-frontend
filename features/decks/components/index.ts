@@ -14,6 +14,10 @@ export { ImageUpload } from './image-upload';
 export { DeckThumbnailUpload, useDeckThumbnailUpload } from './deck-thumbnail-upload';
 export { BulkImageUpload } from './bulk-image-upload';
 
+// AI generation components
+export { AiGenerateForm } from './ai-generate-form';
+export { AiGenerateDialog, useAiGenerateDialog } from './ai-generate-dialog';
+
 // Deck display components
 export { DeckCard } from './deck-card';
 export { DeckCardActions } from './deck-card-actions';
