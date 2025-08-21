@@ -29,6 +29,17 @@ interface CardPreviewProps {
   className?: string;
   /** Callback when card is flipped */
   onCardFlip?: () => void;
+  /** Language for TTS */
+  language?: string;
+  /** Enable text-to-speech */
+  enableTTS?: boolean;
+  /** Auto-play audio when showing cards */
+  autoPlayAudio?: boolean;
+  /** Speech options */
+  speechOptions?: {
+    rate?: number;
+    pitch?: number;
+  };
 }
 
 export function CardPreview({
@@ -41,7 +52,11 @@ export function CardPreview({
   showMetadata = false,
   minimal = false,
   className,
-  onCardFlip
+  onCardFlip,
+  language = 'en-US',
+  enableTTS = true,
+  autoPlayAudio = false,
+  speechOptions = {}
 }: CardPreviewProps) {
   
   const [currentMode, setCurrentMode] = useState<PreviewMode>(mode);
@@ -118,6 +133,9 @@ export function CardPreview({
                 audioUrl={displayData.audioUrl}
                 ipaPronunciation={displayData.ipaPronunciation}
                 tags={displayData.tags}
+                language={language}
+                enableTTS={enableTTS}
+                autoPlayAudio={autoPlayAudio}
               />
               <CardSide
                 title="Back"
@@ -125,6 +143,9 @@ export function CardPreview({
                 examples={displayData.examples}
                 synonyms={displayData.synonyms}
                 antonyms={displayData.antonyms}
+                language={language}
+                enableTTS={enableTTS}
+                autoPlayAudio={autoPlayAudio}
               />
             </div>
           ) : (
@@ -143,6 +164,9 @@ export function CardPreview({
                 synonyms={currentMode === 'back' ? displayData.synonyms : undefined}
                 antonyms={currentMode === 'back' ? displayData.antonyms : undefined}
                 isFlipped={isFlipping}
+                language={language}
+                enableTTS={enableTTS}
+                autoPlayAudio={autoPlayAudio}
               />
             </div>
           )}

@@ -45,6 +45,12 @@ export interface ClientStudyStats {
 export interface ClientStudyPreferences {
   showProgress: boolean;
   shuffleCards: boolean;
+  // Speech/Audio preferences
+  enableTTS: boolean; // Enable text-to-speech
+  autoPlayAudio: boolean; // Auto-play audio when showing cards
+  ttsLanguage: string; // Language for TTS (e.g., 'en-US', 'vi-VN')
+  speechRate: number; // Speech rate (0.1 to 10, default 1)
+  speechPitch: number; // Speech pitch (0 to 2, default 1)
 }
 
 // Store interface

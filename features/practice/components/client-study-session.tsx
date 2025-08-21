@@ -9,6 +9,9 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { COMMON_LANGUAGES } from '@/lib/hooks/use-speech';
 import { CardPreview } from '@/features/flashcards';
 import { useClientStudy } from '../hooks/use-client-study';
 import type { ClientDifficulty } from '../types';
@@ -89,26 +92,112 @@ export function ClientStudySession({ className }: ClientStudySessionProps) {
               <DialogHeader>
                 <DialogTitle>Study Preferences</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="show-progress">Show progress bar</Label>
-                  <Switch
-                    id="show-progress"
-                    checked={preferences.showProgress}
-                    onCheckedChange={(checked) => 
-                      updatePreferences({ showProgress: checked })
-                    }
-                  />
+              <div className="space-y-6">
+                {/* General Settings */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">General</h4>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="show-progress">Show progress bar</Label>
+                    <Switch
+                      id="show-progress"
+                      checked={preferences.showProgress}
+                      onCheckedChange={(checked) => 
+                        updatePreferences({ showProgress: checked })
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="shuffle-cards">Shuffle cards</Label>
+                    <Switch
+                      id="shuffle-cards"
+                      checked={preferences.shuffleCards}
+                      onCheckedChange={(checked) => 
+                        updatePreferences({ shuffleCards: checked })
+                      }
+                    />
+                  </div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="shuffle-cards">Shuffle cards</Label>
-                  <Switch
-                    id="shuffle-cards"
-                    checked={preferences.shuffleCards}
-                    onCheckedChange={(checked) => 
-                      updatePreferences({ shuffleCards: checked })
-                    }
-                  />
+
+                {/* Audio/Speech Settings */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-medium">Audio & Speech</h4>
+                  
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="enable-tts">Enable text-to-speech</Label>
+                    <Switch
+                      id="enable-tts"
+                      checked={preferences.enableTTS}
+                      onCheckedChange={(checked) => 
+                        updatePreferences({ enableTTS: checked })
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="auto-play">Auto-play audio</Label>
+                    <Switch
+                      id="auto-play"
+                      checked={preferences.autoPlayAudio}
+                      onCheckedChange={(checked) => 
+                        updatePreferences({ autoPlayAudio: checked })
+                      }
+                    />
+                  </div>
+
+                  {preferences.enableTTS && (
+                    <>
+                      <div className="space-y-2">
+                        <Label htmlFor="tts-language">Speech Language</Label>
+                        <Select
+                          value={preferences.ttsLanguage}
+                          onValueChange={(value) => 
+                            updatePreferences({ ttsLanguage: value })
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select language" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Object.entries(COMMON_LANGUAGES).map(([code, name]) => (
+                              <SelectItem key={code} value={code}>
+                                {name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="speech-rate">Speech Rate: {preferences.speechRate.toFixed(1)}</Label>
+                        <Slider
+                          id="speech-rate"
+                          min={0.5}
+                          max={2.0}
+                          step={0.1}
+                          value={[preferences.speechRate]}
+                          onValueChange={([value]: [number]) => 
+                            updatePreferences({ speechRate: value })
+                          }
+                          className="w-full"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="speech-pitch">Speech Pitch: {preferences.speechPitch.toFixed(1)}</Label>
+                        <Slider
+                          id="speech-pitch"
+                          min={0.5}
+                          max={2.0}
+                          step={0.1}
+                          value={[preferences.speechPitch]}
+                          onValueChange={([value]: [number]) => 
+                            updatePreferences({ speechPitch: value })
+                          }
+                          className="w-full"
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </DialogContent>
@@ -194,6 +283,9 @@ export function ClientStudySession({ className }: ClientStudySessionProps) {
             showMetadata={false}
             className="mb-6"
             onCardFlip={handleShowAnswer}
+            language={preferences.ttsLanguage}
+            enableTTS={preferences.enableTTS}
+            autoPlayAudio={preferences.autoPlayAudio}
           />
 
           {/* Action buttons */}

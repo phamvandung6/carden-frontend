@@ -4,6 +4,7 @@ import React from 'react';
 import { Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { SpeechButton } from '@/components/ui/speech-button';
 import { cn } from '@/lib/utils';
 
 interface CardSideProps {
@@ -17,6 +18,9 @@ interface CardSideProps {
   antonyms?: string[];
   className?: string;
   isFlipped?: boolean;
+  language?: string; // Language code for TTS (e.g., 'en-US', 'vi-VN')
+  enableTTS?: boolean; // Enable text-to-speech
+  autoPlayAudio?: boolean; // Auto-play audio when card is shown
 }
 
 export function CardSide({
@@ -29,8 +33,22 @@ export function CardSide({
   synonyms,
   antonyms,
   className,
-  isFlipped = false
+  isFlipped = false,
+  language = 'en-US',
+  enableTTS = true,
+  autoPlayAudio = false
 }: CardSideProps) {
+  
+  // Extract clean text from HTML content for TTS
+  const getCleanText = (htmlContent: string) => {
+    if (!htmlContent) return '';
+    // Remove HTML tags and decode entities
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlContent;
+    return tempDiv.textContent || tempDiv.innerText || '';
+  };
+
+  const cleanContent = getCleanText(content);
   return (
     <div className={cn(
       "bg-white dark:bg-gray-900 border rounded-lg shadow-sm min-h-64 flex flex-col",
@@ -42,19 +60,41 @@ export function CardSide({
       <div className="px-4 py-3 border-b bg-muted/30">
         <div className="flex items-center justify-between">
           <h3 className="font-medium text-sm text-muted-foreground">{title}</h3>
-          {audioUrl && (
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent card flip
-                const audio = new Audio(audioUrl);
-                audio.play().catch(console.error);
-              }}
-            >
-              <Volume2 className="w-4 h-4" />
-            </Button>
-          )}
+          <div className="flex items-center gap-1">
+            {/* Audio URL button (if available) */}
+            {audioUrl && (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent card flip
+                  const audio = new Audio(audioUrl);
+                  audio.play().catch(console.error);
+                }}
+                title="Play recorded audio"
+              >
+                <Volume2 className="w-4 h-4" />
+              </Button>
+            )}
+            
+            {/* TTS Button (if enabled and content available) */}
+            {enableTTS && cleanContent && (
+              <div onClick={(e) => e.stopPropagation()}>
+                <SpeechButton
+                  text={cleanContent}
+                  options={{ 
+                    lang: language,
+                    rate: title === 'Front' ? 0.8 : 1.0, // Slower for front side
+                    pitch: title === 'Front' ? 1.1 : 1.0 // Higher pitch for front side
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  label={`Speak ${title.toLowerCase()}`}
+                  autoPlay={autoPlayAudio && title === 'Front'} // Only auto-play for front side
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -81,9 +121,25 @@ export function CardSide({
         {/* IPA */}
         {ipaPronunciation && (
           <div className="text-center">
-            <span className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded">
-              {ipaPronunciation}
-            </span>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-xs text-muted-foreground font-mono bg-muted/50 px-2 py-1 rounded">
+                {ipaPronunciation}
+              </span>
+              {enableTTS && (
+                <SpeechButton
+                  text={cleanContent} // Use the main content for IPA pronunciation
+                  options={{ 
+                    lang: language,
+                    rate: 0.7, // Very slow for pronunciation
+                    pitch: 1.2 // Higher pitch for clarity
+                  }}
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 p-0"
+                  label="Pronounce word"
+                />
+              )}
+            </div>
           </div>
         )}
 
@@ -93,7 +149,23 @@ export function CardSide({
             <h4 className="text-xs font-medium text-muted-foreground mb-1">Examples:</h4>
             <ul className="text-xs space-y-1">
               {examples.slice(0, 2).map((example, index) => (
-                <li key={index} className="text-muted-foreground">• {example}</li>
+                <li key={index} className="text-muted-foreground flex items-start gap-2">
+                  <span className="flex-1">• {example}</span>
+                  {enableTTS && (
+                    <SpeechButton
+                      text={example}
+                      options={{ 
+                        lang: language,
+                        rate: 0.9,
+                        pitch: 1.0
+                      }}
+                      variant="ghost"
+                      size="icon"
+                      className="h-4 w-4 p-0 opacity-60 hover:opacity-100"
+                      label={`Speak example: ${example.slice(0, 30)}...`}
+                    />
+                  )}
+                </li>
               ))}
               {examples.length > 2 && (
                 <li className="text-muted-foreground">• +{examples.length - 2} more...</li>

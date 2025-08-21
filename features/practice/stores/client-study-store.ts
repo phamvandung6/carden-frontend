@@ -16,7 +16,13 @@ import type {
 // Default preferences
 const defaultPreferences: ClientStudyPreferences = {
   showProgress: true,
-  shuffleCards: true
+  shuffleCards: true,
+  // Speech/Audio preferences
+  enableTTS: true,
+  autoPlayAudio: false, // Don't auto-play by default to avoid being annoying
+  ttsLanguage: 'en-US',
+  speechRate: 1.0,
+  speechPitch: 1.0
 };
 
 // Helper function to shuffle array
