@@ -45,13 +45,13 @@ export function AnalyticsDashboard({
     totalStudyTime
   } = useAnalytics();
 
-  // Load performance data for overview tab on mount only once
+  // Load all necessary data for overview tab on mount
   React.useEffect(() => {
-    if (defaultTab === 'overview' && !performance) {
-      // Load performance data for ProgressChart in overview tab only if not already loaded
-      loadPerformance();
+    if (defaultTab === 'overview') {
+      // Load all data needed for Overview tab to show complete statistics
+      loadDetailedData();
     }
-  }, [defaultTab]); // Remove loadPerformance from dependencies to prevent infinite loop
+  }, [defaultTab, loadDetailedData]);
 
   const formatTime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -158,16 +158,7 @@ export function AnalyticsDashboard({
         </Button>
       </div>
 
-      {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        {statsCards.map((stat, index) => (
-          <StatsCard
-            key={index}
-            data={stat}
-            variant="compact"
-          />
-        ))}
-      </div>
+
 
       {/* Main Analytics Tabs */}
       <Tabs defaultValue={defaultTab} className="w-full" onValueChange={(value) => {
@@ -176,9 +167,9 @@ export function AnalyticsDashboard({
           loadDetailedData();
         } else if (value === 'streaks' && !streaks) {
           loadStreaks();
-        } else if (value === 'overview' && !performance) {
-          // Load performance data for overview tab since it has ProgressChart, only if not loaded
-          loadPerformance();
+        } else if (value === 'overview') {
+          // Load all data needed for Overview tab to show complete statistics
+          loadDetailedData();
         }
       }}>
         <TabsList className="grid w-full grid-cols-4">

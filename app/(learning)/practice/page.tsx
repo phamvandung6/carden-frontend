@@ -122,23 +122,6 @@ export default function PracticePage() {
               >
                 {isLoading ? 'Starting...' : 'Start FLIP Mode'}
               </Button>
-              
-              <div className="grid grid-cols-2 gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleStartSession('TYPE_ANSWER')}
-                  disabled={isLoading}
-                >
-                  Type Answer
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => handleStartSession('MULTIPLE_CHOICE')}
-                  disabled={isLoading}
-                >
-                  Multiple Choice
-                </Button>
-              </div>
             </div>
 
             <Button variant="ghost" onClick={handleBackToStudy}>

@@ -38,29 +38,75 @@ export function DeckFormPage({ deck, onSuccess, backUrl = '/decks' }: DeckFormPa
         });
 
         if (response.success && response.data) {
-          if (onSuccess) {
-            onSuccess(response.data);
-          } else {
-            router.push(backUrl);
-          }
-        }
-      } else {
-        // Create new deck
-        const createData = formDataToCreateRequest(formData);
-        const response = await createDeckMutation.mutateAsync(createData);
-
-        if (response.success && response.data) {
-          const newDeck = response.data;
+          const updatedDeck = response.data;
           
-          // If user selected a cover image (blob URL), upload it
-          if (formData.coverImageUrl && formData.coverImageUrl.startsWith('blob:')) {
+          // Handle image changes after deck update
+          if (formData.coverImageUrl && 
+              typeof formData.coverImageUrl === 'string' && 
+              formData.coverImageUrl.startsWith('blob:')) {
+            // User selected a new cover image (blob URL), upload it
             try {
               // Convert blob URL back to File object
               const imageResponse = await fetch(formData.coverImageUrl);
               const imageBlob = await imageResponse.blob();
               const imageFile = new File([imageBlob], 'cover-image.jpg', { type: imageBlob.type });
               
-              // Upload the image
+              // Upload the new image using presigned URL
+              const publicUrl = await DecksApi.uploadDeckThumbnail(updatedDeck.id, imageFile);
+              
+              // Update deck with the new image URL
+              await updateDeckMutation.mutateAsync({
+                id: updatedDeck.id,
+                data: { coverImageUrl: publicUrl }
+              });
+              
+              // Update the deck object with new image URL
+              updatedDeck.coverImageUrl = publicUrl;
+            } catch (uploadError) {
+              console.error('Failed to upload new cover image:', uploadError);
+              // Continue anyway - deck was updated successfully
+            }
+          } else if (formData.coverImageUrl === null && deck.coverImageUrl) {
+            // User removed the existing image, update deck to remove it
+            try {
+              await updateDeckMutation.mutateAsync({
+                id: updatedDeck.id,
+                data: { coverImageUrl: undefined }
+              });
+              
+              // Update the deck object
+              updatedDeck.coverImageUrl = null;
+            } catch (uploadError) {
+              console.error('Failed to remove cover image:', uploadError);
+              // Continue anyway - deck was updated successfully
+            }
+          }
+          
+          if (onSuccess) {
+            onSuccess(updatedDeck);
+          } else {
+            router.push(backUrl);
+          }
+        }
+      } else {
+        // Create new deck (without image first)
+        const createData = formDataToCreateRequest(formData);
+        const response = await createDeckMutation.mutateAsync(createData);
+
+        if (response.success && response.data) {
+          const newDeck = response.data;
+          
+          // If user selected a cover image (blob URL), upload it after deck creation
+          if (formData.coverImageUrl && 
+              typeof formData.coverImageUrl === 'string' && 
+              formData.coverImageUrl.startsWith('blob:')) {
+            try {
+              // Convert blob URL back to File object
+              const imageResponse = await fetch(formData.coverImageUrl);
+              const imageBlob = await imageResponse.blob();
+              const imageFile = new File([imageBlob], 'cover-image.jpg', { type: imageBlob.type });
+              
+              // Upload the image using presigned URL
               const publicUrl = await DecksApi.uploadDeckThumbnail(newDeck.id, imageFile);
               
               // Update deck with the real image URL

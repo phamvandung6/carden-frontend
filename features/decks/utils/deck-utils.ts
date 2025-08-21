@@ -51,8 +51,10 @@ export function formDataToCreateRequest(formData: DeckFormData) {
     request.tags = formData.tags.filter(tag => tag.trim().length > 0);
   }
   
-  // Don't include blob URLs in the request - they will be handled separately
-  if (formData.coverImageUrl && !formData.coverImageUrl.startsWith('blob:')) {
+  // Don't include File objects or blob URLs in the request - they will be handled separately
+  if (formData.coverImageUrl && 
+      typeof formData.coverImageUrl === 'string' && 
+      !formData.coverImageUrl.startsWith('blob:')) {
     request.coverImageUrl = formData.coverImageUrl;
   }
 

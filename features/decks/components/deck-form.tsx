@@ -59,7 +59,7 @@ export function DeckForm({ deck, onSubmit, onCancel, loading = false, error }: D
         sourceLanguage: data.sourceLanguage || '',
         targetLanguage: data.targetLanguage || '',
         tags: data.tags || [],
-        coverImageUrl: data.coverImageUrl || null,
+        coverImageUrl: data.coverImageUrl || null, // This can now be File, string, or null
         visibility: data.visibility,
       };
 

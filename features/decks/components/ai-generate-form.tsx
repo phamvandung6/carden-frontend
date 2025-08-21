@@ -90,26 +90,7 @@ export function AiGenerateForm({
   return (
     <div className={className}>
       <Card>
-        <CardHeader className="pb-4">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500">
-              <Sparkles className="w-4 h-4 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-lg">AI Card Generator</CardTitle>
-              <CardDescription>
-                Generate flashcards automatically using AI
-                {deckTitle && (
-                  <span className="block text-xs text-muted-foreground mt-1">
-                    for "{deckTitle}"
-                  </span>
-                )}
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-6">
           {/* Generation Progress */}
           {isGenerating && (
             <Alert>

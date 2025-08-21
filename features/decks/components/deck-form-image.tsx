@@ -11,6 +11,16 @@ interface DeckImageFieldProps {
 }
 
 export function DeckImageField({ form, loading = false }: DeckImageFieldProps) {
+  const handleImageChange = (file: File | null) => {
+    if (file) {
+      // Create blob URL for preview and store File object in form
+      const blobUrl = URL.createObjectURL(file);
+      form.setValue('coverImageUrl', blobUrl);
+    } else {
+      form.setValue('coverImageUrl', null);
+    }
+  };
+
   return (
     <FormField
       control={form.control}
@@ -20,8 +30,8 @@ export function DeckImageField({ form, loading = false }: DeckImageFieldProps) {
           <FormLabel>Cover Image</FormLabel>
           <FormControl>
             <ImageUpload
-              value={field.value}
-              onChange={field.onChange}
+              value={typeof field.value === 'string' ? field.value : null}
+              onChange={handleImageChange}
               disabled={loading}
               className="w-full"
             />

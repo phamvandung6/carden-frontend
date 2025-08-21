@@ -13,7 +13,11 @@ export function useProgressData() {
     if (!performance?.accuracyTrend) return [];
     
     return performance.accuracyTrend.map((point) => ({
-      date: new Date(point.date).toLocaleDateString(),
+      date: new Date(point.date).toLocaleTimeString('vi-VN', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: false 
+      }),
       value: Math.round(point.accuracy * 100) / 100, // Round to 2 decimal places
       label: `${Math.round(point.accuracy)}%`
     }));

@@ -124,7 +124,7 @@ export interface DeckFormData {
   sourceLanguage: string;
   targetLanguage: string;
   tags: string[];
-  coverImageUrl: string | null;
+  coverImageUrl: string | File | null;
   visibility: 'PRIVATE' | 'PUBLIC' | 'UNLISTED';
 }
 

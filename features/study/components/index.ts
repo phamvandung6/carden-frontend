@@ -7,3 +7,4 @@ export * from './review-scheduler';
 export * from './study-button';
 export * from './study-status';
 export * from './next-review-info';
+export * from './study-options';

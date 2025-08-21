@@ -112,6 +112,8 @@ export function ProgressChart({
                       borderRadius: '6px',
                     }}
                     labelStyle={{ color: 'hsl(var(--foreground))' }}
+                    labelFormatter={(value) => `Thời gian: ${value}`}
+                    formatter={(value: number) => [`${Math.round(value)}%`, 'Độ chính xác']}
                   />
                   <Line
                     type="monotone"
@@ -124,9 +126,6 @@ export function ProgressChart({
                 </LineChart>
               </ResponsiveContainer>
             </div>
-            <p className="text-sm text-muted-foreground mt-2">
-              Your accuracy percentage over time
-            </p>
           </TabsContent>
           
           <TabsContent value="studyTime" className="mt-4">

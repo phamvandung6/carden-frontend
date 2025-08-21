@@ -81,11 +81,13 @@ export const deckFormSchema = z.object({
     .max(10, 'Maximum 10 tags allowed')
     .optional(),
   coverImageUrl: z
-    .string()
-    .url('Invalid image URL')
+    .union([
+      z.string().url('Invalid image URL'),
+      z.literal(''),
+      z.instanceof(File),
+    ])
     .nullable()
-    .optional()
-    .or(z.literal('')),
+    .optional(),
   visibility: z
     .enum(['PRIVATE', 'PUBLIC', 'UNLISTED'])
     .default('PRIVATE'),

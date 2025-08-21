@@ -19,7 +19,6 @@ interface CardListProps {
 }
 
 export function CardList({ deckId, deckTitle, onStudy }: CardListProps) {
-  const [searchQuery, setSearchQuery] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingCard, setEditingCard] = useState<CardType | null>(null);
   const [previewCard, setPreviewCard] = useState<CardType | null>(null);
@@ -30,7 +29,6 @@ export function CardList({ deckId, deckTitle, onStudy }: CardListProps) {
     isLoading, 
     error 
   } = useCardsByDeck(deckId, {
-    search: searchQuery || undefined,
     page: currentPage,
     size: 12
   });
@@ -62,10 +60,7 @@ export function CardList({ deckId, deckTitle, onStudy }: CardListProps) {
     toast.success('Card updated successfully');
   };
 
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    setCurrentPage(0); // Reset to first page when searching
-  };
+
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -75,8 +70,8 @@ export function CardList({ deckId, deckTitle, onStudy }: CardListProps) {
     return (
       <div className="space-y-6">
         <CardListToolbar
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
+          searchQuery=""
+          onSearchChange={() => {}}
           onCreateCard={() => setShowCreateForm(true)}
           deckId={deckId}
           deckTitle={deckTitle}
@@ -105,8 +100,8 @@ export function CardList({ deckId, deckTitle, onStudy }: CardListProps) {
   return (
     <div className="space-y-6">
       <CardListToolbar
-        searchQuery={searchQuery}
-        onSearchChange={handleSearchChange}
+        searchQuery=""
+        onSearchChange={() => {}}
         onCreateCard={() => setShowCreateForm(true)}
         deckId={deckId}
         deckTitle={deckTitle}
@@ -117,8 +112,8 @@ export function CardList({ deckId, deckTitle, onStudy }: CardListProps) {
         <CardListEmpty
           deckTitle={deckTitle}
           onCreateCard={() => setShowCreateForm(true)}
-          isSearching={!!searchQuery}
-          searchQuery={searchQuery}
+          isSearching={false}
+          searchQuery=""
           deckId={deckId}
           onStudy={onStudy}
         />

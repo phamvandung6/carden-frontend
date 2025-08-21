@@ -34,7 +34,7 @@ import { toast } from 'sonner';
 import { PageHeader } from '@/components/ui/page-header';
 import { useDeckById, useDeckOperations, AiGenerateDialog } from '@/features/decks';
 import { CardList } from '@/features/flashcards';
-import { useDueCardsCount, StudyStatus } from '@/features/study';
+import { useDueCardsCount, StudyStatus, StudyOptions } from '@/features/study';
 
 export default function DeckDetailPage() {
   const params = useParams();
@@ -136,11 +136,6 @@ export default function DeckDetailPage() {
             <Button variant="outline" onClick={handleBack}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
-            </Button>
-            
-            <Button onClick={handleStudy} className="bg-green-600 hover:bg-green-700 text-white">
-              <BookOpen className="h-4 w-4 mr-2" />
-              Study Cards
             </Button>
 
             {isOwner && (
@@ -264,6 +259,14 @@ export default function DeckDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Study Options */}
+      <StudyOptions 
+        dueCount={dueCount}
+        deckTitle={deck.title}
+        onSrsStudy={handlePractice}
+        onClientStudy={handleStudy}
+      />
 
       {/* Deck Content Tabs */}
       <Tabs defaultValue="cards" className="space-y-6">

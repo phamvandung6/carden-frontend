@@ -1,11 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Plus, Search, Filter, Sparkles, Play } from 'lucide-react';
+import { Plus, Search, Filter, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AiGenerateDialog } from '@/features/decks';
-import { StudyButton } from '@/features/study';
 
 interface CardListToolbarProps {
   searchQuery: string;
@@ -29,18 +28,7 @@ export function CardListToolbar({
   onStudy
 }: CardListToolbarProps) {
   return (
-    <div className="flex items-center justify-between gap-4 mb-6">
-      {/* Search */}
-      <div className="relative flex-1 max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search cards..."
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-9"
-        />
-      </div>
-
+    <div className="flex items-center justify-end gap-4 mb-6">
       {/* Actions */}
       <div className="flex items-center gap-2">
         {onToggleFilters && (
@@ -53,17 +41,6 @@ export function CardListToolbar({
           >
             <Filter className="h-4 w-4 mr-2" />
             Filter
-          </Button>
-        )}
-        
-        {/* Study Button */}
-        {onStudy && (
-          <Button 
-            onClick={onStudy}
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            <Play className="h-4 w-4 mr-2" />
-            Study Deck
           </Button>
         )}
         
