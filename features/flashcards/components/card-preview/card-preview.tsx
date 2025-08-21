@@ -27,6 +27,8 @@ interface CardPreviewProps {
   minimal?: boolean;
   /** Additional CSS classes */
   className?: string;
+  /** Callback when card is flipped */
+  onCardFlip?: () => void;
 }
 
 export function CardPreview({
@@ -38,7 +40,8 @@ export function CardPreview({
   onToggleFullscreen,
   showMetadata = false,
   minimal = false,
-  className
+  className,
+  onCardFlip
 }: CardPreviewProps) {
   
   const [currentMode, setCurrentMode] = useState<PreviewMode>(mode);
@@ -78,6 +81,8 @@ export function CardPreview({
   const handleCardClick = () => {
     if (currentMode === 'front') {
       handleModeChange('back');
+      // Call onCardFlip callback when flipping from front to back
+      onCardFlip?.();
     } else if (currentMode === 'back') {
       handleModeChange('front');
     }

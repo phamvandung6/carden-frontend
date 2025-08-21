@@ -35,9 +35,9 @@ export function ClientStudySession({ className }: ClientStudySessionProps) {
 
   const { currentCard, showAnswer: isAnswerVisible, currentCardIndex, totalCards, mode } = currentSession;
   
-  // Progress based on completed cards vs total cards
-  const completedCards = sessionStats?.easyCards || 0;
-  const progress = totalCards > 0 ? (completedCards / totalCards) * 100 : 0;
+  // Progress based on easy cards vs total cards (mastery percentage)
+  const easyCards = sessionStats?.easyCards || 0;
+  const progress = totalCards > 0 ? (easyCards / totalCards) * 100 : 0;
 
   const handleRate = (difficulty: ClientDifficulty) => {
     rateCard(difficulty);
@@ -193,12 +193,13 @@ export function ClientStudySession({ className }: ClientStudySessionProps) {
             animate={true}
             showMetadata={false}
             className="mb-6"
+            onCardFlip={handleShowAnswer}
           />
 
           {/* Action buttons */}
           <div className="flex flex-col gap-4">
             {!isAnswerVisible ? (
-              // Show answer button
+              // Show answer button (as fallback)
               <Button
                 onClick={handleShowAnswer}
                 size="lg"
@@ -208,7 +209,7 @@ export function ClientStudySession({ className }: ClientStudySessionProps) {
                 Show Answer
               </Button>
             ) : (
-              // Rating buttons
+              // Rating buttons (auto-show after flip)
               <div className="space-y-3">
                 <div className="text-center text-sm text-muted-foreground mb-4">
                   How well did you know this card?

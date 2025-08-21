@@ -140,8 +140,57 @@ export const useClientStudyStore = create<ClientStudyStore>()(
               currentCard.needsReview = true;
             }
 
-            // Always auto advance after rating (no need for preference)
-            get().nextCard();
+            // Check if all cards are mastered (rated as easy)
+            const totalCards = session.cards.length;
+            const easyCards = session.cards.filter(card => card.clientDifficulty === 'easy').length;
+            
+            console.log('Progress check:', { totalCards, easyCards, completedCardsCount: session.completedCards.length });
+            
+            if (easyCards >= totalCards) {
+              // Session complete - all cards mastered
+              console.log('All cards mastered! Completing session...');
+              session.isComplete = true;
+              session.isActive = false;
+              session.endTime = new Date();
+              return;
+            }
+
+            // Find next card that needs review (not rated as easy yet)
+            session.showAnswer = false;
+            let nextCardIndex = -1;
+            
+            // Look for next card that hasn't been mastered
+            for (let i = session.currentCardIndex + 1; i < session.cards.length; i++) {
+              if (!session.cards[i].clientDifficulty || session.cards[i].clientDifficulty !== 'easy') {
+                nextCardIndex = i;
+                break;
+              }
+            }
+            
+            // If no unmastered card found after current position, look from beginning
+            if (nextCardIndex === -1) {
+              for (let i = 0; i < session.currentCardIndex; i++) {
+                if (!session.cards[i].clientDifficulty || session.cards[i].clientDifficulty !== 'easy') {
+                  nextCardIndex = i;
+                  break;
+                }
+              }
+            }
+
+            console.log('Next card search:', { currentIndex: session.currentCardIndex, nextCardIndex });
+
+            if (nextCardIndex !== -1) {
+              // Move to next unmastered card
+              session.currentCardIndex = nextCardIndex;
+              session.currentCard = session.cards[nextCardIndex];
+              console.log('Moving to card:', nextCardIndex, session.cards[nextCardIndex].front);
+            } else {
+              // No more unmastered cards found - complete session
+              console.log('No more unmastered cards found - completing session');
+              session.isComplete = true;
+              session.isActive = false;
+              session.endTime = new Date();
+            }
           });
         },
 
@@ -153,47 +202,20 @@ export const useClientStudyStore = create<ClientStudyStore>()(
             // Hide answer for next card
             session.showAnswer = false;
 
-            // Get all cards that still need review (from original deck)
-            const allCards = session.cards; // This should be all original cards
-            const cardsNeedingReview = allCards.filter(card => card.needsReview);
+            // Simple logic: move to next card in sequence
+            const nextCardIndex = session.currentCardIndex + 1;
             
-            // If no cards need review, session is complete
-            if (cardsNeedingReview.length === 0) {
+            // If we've reached the end of all cards, session is complete
+            if (nextCardIndex >= session.totalCards) {
               session.isComplete = true;
               session.isActive = false;
               session.endTime = new Date();
               return;
             }
 
-            // Find next card that needs review
-            let nextCardIndex = -1;
-            for (let i = session.currentCardIndex + 1; i < allCards.length; i++) {
-              if (allCards[i].needsReview) {
-                nextCardIndex = i;
-                break;
-              }
-            }
-
-            // If no next card found, start from beginning
-            if (nextCardIndex === -1) {
-              for (let i = 0; i <= session.currentCardIndex; i++) {
-                if (allCards[i].needsReview) {
-                  nextCardIndex = i;
-                  break;
-                }
-              }
-            }
-
-            // Set next card
-            if (nextCardIndex !== -1) {
-              session.currentCardIndex = nextCardIndex;
-              session.currentCard = allCards[nextCardIndex];
-            } else {
-              // This shouldn't happen, but just in case
-              session.isComplete = true;
-              session.isActive = false;
-              session.endTime = new Date();
-            }
+            // Move to next card
+            session.currentCardIndex = nextCardIndex;
+            session.currentCard = session.cards[nextCardIndex];
           });
         },
 
@@ -241,7 +263,7 @@ export const useClientStudyStore = create<ClientStudyStore>()(
             studiedCards,
             easyCards,
             hardCards,
-            completionRate: totalCards > 0 ? (easyCards / totalCards) * 100 : 0,
+            completionRate: totalCards > 0 ? (easyCards / totalCards) * 100 : 0, // Based on mastered cards
             studyTime: Math.max(studyTime, 0),
             averageTimePerCard: studiedCards > 0 ? (studyTime * 60) / studiedCards : 0
           };

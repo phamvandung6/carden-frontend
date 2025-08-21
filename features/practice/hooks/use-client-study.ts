@@ -97,6 +97,7 @@ export function useClientStudy(): UseClientStudyReturn {
   // Rate card with feedback
   const rateCard = useCallback((difficulty: ClientDifficulty) => {
     const wasActive = currentSession?.isActive;
+    
     storeRateCard(difficulty);
     
     // Show subtle feedback
@@ -109,6 +110,7 @@ export function useClientStudy(): UseClientStudyReturn {
     // Check if session just completed after rating
     setTimeout(() => {
       const newSession = useClientStudyStore.getState().currentSession;
+      
       if (wasActive && newSession?.isComplete) {
         const stats = getSessionStats();
         if (stats) {
